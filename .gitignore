@@ -101,6 +101,7 @@ Datasource.swift
 # External Code
 fetch_and_save.sh
 source_monitor.json
+output/
 
 
 # End of https://www.toptal.com/developers/gitignore/api/swift
