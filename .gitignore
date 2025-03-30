@@ -103,6 +103,7 @@ fetch_and_save.sh
 source_monitor.json
 fetch_and_save_free.sh
 output/
+output_park_info/
 
 
 # End of https://www.toptal.com/developers/gitignore/api/swift
