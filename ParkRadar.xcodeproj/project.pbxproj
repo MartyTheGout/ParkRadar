@@ -6,8 +6,36 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		40B7F2002D98F74200BCF577 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 40B7F1FF2D98F74200BCF577 /* SnapKit */; };
+		40B7F2032D98F7BF00BCF577 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 40B7F2022D98F7BF00BCF577 /* RealmSwift */; };
+		40B7F2042D98F7C900BCF577 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 40B7F2022D98F7BF00BCF577 /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		40B7F22F2D98FE7F00BCF577 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 40B7F22E2D98FE7F00BCF577 /* .gitignore */; };
+		40B7F2B92D99095A00BCF577 /* fetch_and_save.sh in Resources */ = {isa = PBXBuildFile; fileRef = 40B7F2B82D99095A00BCF577 /* fetch_and_save.sh */; };
+		40B7F2BB2D99096C00BCF577 /* source_monitor.json in Resources */ = {isa = PBXBuildFile; fileRef = 40B7F2BA2D99096C00BCF577 /* source_monitor.json */; };
+		40B7F2BF2D990B7300BCF577 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 40B7F2BE2D990B7300BCF577 /* README.md */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		40B7F2052D98F7C900BCF577 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				40B7F2042D98F7C900BCF577 /* RealmSwift in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		40B7EAC22D93F21800BCF577 /* ParkRadar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ParkRadar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		40B7F22E2D98FE7F00BCF577 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		40B7F2B82D99095A00BCF577 /* fetch_and_save.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = fetch_and_save.sh; sourceTree = "<group>"; };
+		40B7F2BA2D99096C00BCF577 /* source_monitor.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = source_monitor.json; sourceTree = "<group>"; };
+		40B7F2BE2D990B7300BCF577 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -36,6 +64,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40B7F2032D98F7BF00BCF577 /* RealmSwift in Frameworks */,
+				40B7F2002D98F74200BCF577 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -45,6 +75,10 @@
 		40B7EAB92D93F21800BCF577 = {
 			isa = PBXGroup;
 			children = (
+				40B7F2BE2D990B7300BCF577 /* README.md */,
+				40B7F2BA2D99096C00BCF577 /* source_monitor.json */,
+				40B7F2B82D99095A00BCF577 /* fetch_and_save.sh */,
+				40B7F22E2D98FE7F00BCF577 /* .gitignore */,
 				40B7EAC42D93F21800BCF577 /* ParkRadar */,
 				40B7EAC32D93F21800BCF577 /* Products */,
 			);
@@ -68,6 +102,7 @@
 				40B7EABE2D93F21800BCF577 /* Sources */,
 				40B7EABF2D93F21800BCF577 /* Frameworks */,
 				40B7EAC02D93F21800BCF577 /* Resources */,
+				40B7F2052D98F7C900BCF577 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -78,6 +113,8 @@
 			);
 			name = ParkRadar;
 			packageProductDependencies = (
+				40B7F1FF2D98F74200BCF577 /* SnapKit */,
+				40B7F2022D98F7BF00BCF577 /* RealmSwift */,
 			);
 			productName = ParkRadar;
 			productReference = 40B7EAC22D93F21800BCF577 /* ParkRadar.app */;
@@ -107,6 +144,10 @@
 			);
 			mainGroup = 40B7EAB92D93F21800BCF577;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				40B7F1FE2D98F74200BCF577 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				40B7F2012D98F7BF00BCF577 /* XCRemoteSwiftPackageReference "realm-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 40B7EAC32D93F21800BCF577 /* Products */;
 			projectDirPath = "";
@@ -122,6 +163,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40B7F2BF2D990B7300BCF577 /* README.md in Resources */,
+				40B7F2B92D99095A00BCF577 /* fetch_and_save.sh in Resources */,
+				40B7F2BB2D99096C00BCF577 /* source_monitor.json in Resources */,
+				40B7F22F2D98FE7F00BCF577 /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -349,6 +394,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		40B7F1FE2D98F74200BCF577 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.7.1;
+			};
+		};
+		40B7F2012D98F7BF00BCF577 /* XCRemoteSwiftPackageReference "realm-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-swift.git";
+			requirement = {
+				kind = exactVersion;
+				version = 10.54.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		40B7F1FF2D98F74200BCF577 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 40B7F1FE2D98F74200BCF577 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
+		};
+		40B7F2022D98F7BF00BCF577 /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 40B7F2012D98F7BF00BCF577 /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 40B7EABA2D93F21800BCF577 /* Project object */;
 }
