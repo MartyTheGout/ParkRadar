@@ -101,6 +101,7 @@ Datasource.swift
 # External Code
 fetch_and_save.sh
 source_monitor.json
+fetch_and_save_free.sh
 output/
 
 
