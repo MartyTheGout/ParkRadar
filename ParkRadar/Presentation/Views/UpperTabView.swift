@@ -53,7 +53,3 @@ final class UpperTabView : UIView {
         illegalExplanationButton.configuration = UIButton.Configuration.verticalStyle(title: "불법\n주정차벌금", imageName: "person.crop.square.filled.and.at.rectangle.fill")
     }
 }
-
-#Preview {
-    UpperTabView()
-}
