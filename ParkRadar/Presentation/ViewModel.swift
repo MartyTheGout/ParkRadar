@@ -65,7 +65,6 @@ final class MapViewModel: ObservableObject {
                     // for zoom-out, only emits clustering info. 
                     safePub.send([])
                     dangerPub.send([])
-                    print("ddddd")
                 }
             }
             .store(in: &cancellables)
