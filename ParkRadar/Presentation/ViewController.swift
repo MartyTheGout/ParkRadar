@@ -12,7 +12,7 @@ import Combine
 
 final class MapViewController: UIViewController {
 
-    private let mapView = MKMapView()
+    private let mainView = MainView()
     private let locationManager = CLLocationManager()
     private let viewModel = MapViewModel()
 
@@ -21,22 +21,39 @@ final class MapViewController: UIViewController {
     private let currentCenterSubject = CurrentValueSubject<CLLocationCoordinate2D, Never>(.init())
     private let currentAltitudeSubject = CurrentValueSubject<CLLocationDistance, Never>(0)
     
-    private let zoneRadius: CLLocationDistance = 10 // overlayRadius for presentation
+    private let zoneRadius: CLLocationDistance = 100 // overlayRadius for presentation
 
+    override func loadView() {
+        self.view = mainView
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        configureNavigationAppearance()
         setupMapView()
         setupLocationManager()
         bindViewModel()
+        
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: false)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        let sheet = MultiStepBottomSheet()
+        sheet.attach(to: self.view)
     }
 
     private func setupMapView() {
-        mapView.frame = view.bounds
-        mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.addSubview(mapView)
-
-        mapView.delegate = self
-        mapView.showsUserLocation = true
+        mainView.mapView.frame = view.bounds
+        mainView.mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        mainView.mapView.delegate = self
+        mainView.mapView.showsUserLocation = true
     }
 
     private func setupLocationManager() {
@@ -69,23 +86,37 @@ final class MapViewController: UIViewController {
     }
 
     private func updateAnnotations<T: MKAnnotation>(ofType type: T.Type, with newAnnotations: [T]) {
-        let existing = mapView.annotations.compactMap { $0 as? T }
-        mapView.removeAnnotations(existing)
+        let existing = mainView.mapView.annotations.compactMap { $0 as? T }
+        mainView.mapView.removeAnnotations(existing)
 
-        let overlaysToRemove = mapView.overlays.compactMap { $0 as? MKCircle }.filter { circle in
+        let overlaysToRemove = mainView.mapView.overlays.compactMap { $0 as? MKCircle }.filter { circle in
             newAnnotations.contains { annotation in
                 circle.coordinate.latitude == annotation.coordinate.latitude &&
                 circle.coordinate.longitude == annotation.coordinate.longitude
             }
         }
-        mapView.removeOverlays(overlaysToRemove)
+        mainView.mapView.removeOverlays(overlaysToRemove)
 
-        mapView.addAnnotations(newAnnotations)
+        mainView.mapView.addAnnotations(newAnnotations)
 
         for annotation in newAnnotations {
             let circle = MKCircle(center: annotation.coordinate, radius: zoneRadius)
-            mapView.addOverlay(circle)
+            mainView.mapView.addOverlay(circle)
         }
+    }
+}
+
+extension MapViewController {
+    func configureNavigationAppearance() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithTransparentBackground()
+
+        appearance.backgroundColor = Color.Back.main.ui
+        appearance.shadowColor = .clear
+
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+        
     }
 }
 
@@ -97,10 +128,10 @@ extension MapViewController: CLLocationManagerDelegate {
         let region = MKCoordinateRegion(center: coordinate,
                                         latitudinalMeters: 1000,
                                         longitudinalMeters: 1000)
-        mapView.setRegion(region, animated: true)
+        mainView.mapView.setRegion(region, animated: true)
 
         currentCenterSubject.send(coordinate)
-        currentAltitudeSubject.send(mapView.camera.altitude)
+        currentAltitudeSubject.send(mainView.mapView.camera.altitude)
 
         locationManager.stopUpdatingLocation()
     }
