@@ -35,6 +35,16 @@ final class MultiStepBottomSheet: UIView {
         return label
     }()
     
+    lazy var collectionView: UICollectionView = {
+        let layout = createLayout()
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.alwaysBounceVertical = true
+        collectionView.contentInset = UIEdgeInsets(top: 8, left: 0, bottom: 32, right: 0)
+        return collectionView
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         configureViewHierarchy()
@@ -51,10 +61,10 @@ final class MultiStepBottomSheet: UIView {
         addSubview(blurView)
         addSubview(grabber)
         addSubview(locationLabel)
+        addSubview(collectionView)
     }
     
     private func configureViewConstraints() {
-        
         blurView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
@@ -69,7 +79,13 @@ final class MultiStepBottomSheet: UIView {
         
         locationLabel.snp.makeConstraints{
             $0.top.equalTo(grabber.snp.bottom).offset(16)
-            $0.leading.equalToSuperview().inset(8)
+            $0.leading.equalToSuperview().inset(16)
+        }
+        
+        
+        collectionView.snp.makeConstraints {
+            $0.top.equalTo(locationLabel.snp.bottom).offset(12)
+            $0.leading.trailing.bottom.equalToSuperview()
         }
     }
     
@@ -104,6 +120,7 @@ final class MultiStepBottomSheet: UIView {
     
     private func setupGesture() {
         panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
+        panGesture.delegate = self
         addGestureRecognizer(panGesture)
     }
     
@@ -139,3 +156,46 @@ final class MultiStepBottomSheet: UIView {
     }
 }
 
+extension MultiStepBottomSheet {
+    private func createLayout() -> UICollectionViewCompositionalLayout {
+        return UICollectionViewCompositionalLayout { sectionIndex, _ in
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                  heightDimension: .estimated(80))
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            
+            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                   heightDimension: .estimated(80))
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+            
+            let section = NSCollectionLayoutSection(group: group)
+            section.interGroupSpacing = 8
+            section.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 16, trailing: 16)
+            return section
+        }
+    }
+    
+    private func setupCollectionView() {
+        collectionView.register(ParkingInfoCell.self, forCellWithReuseIdentifier: ParkingInfoCell.reuseIdentifier)
+    }
+}
+
+extension MultiStepBottomSheet: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true // ***collectionView scroll과 공존 가능하도록
+    }
+
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard let gestureView = gestureRecognizer.view else { return false }
+
+         let location = gestureRecognizer.location(in: self)
+         let isInsideCollectionView = collectionView.frame.contains(location)
+
+         return !isInsideCollectionView // **collectionView 바깥에서 시작했을 때만 시트 드래그 허용
+    }
+}
+
+extension MultiStepBottomSheet {
+    func updateCurrentAddress(with info: String) {
+        locationLabel.text = "현재장소: \(info)"
+    }
+}
