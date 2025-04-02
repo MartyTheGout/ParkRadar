@@ -12,6 +12,7 @@ final class MapViewModel: ObservableObject {
         let currentCenter: AnyPublisher<CLLocationCoordinate2D, Never>
         let currentAltitude: AnyPublisher<CLLocationDistance, Never>
         let currentLocation: AnyPublisher<CLLocation, Never>
+        let selectedParking: AnyPublisher<SafeParkingArea, Never>
     }
     
     struct Output {
@@ -19,6 +20,7 @@ final class MapViewModel: ObservableObject {
         let dangerAnnotations: AnyPublisher<[DangerAnnotation], Never>
         let addressInformation: AnyPublisher<String, Never>
         let parkingInformation: AnyPublisher<[SafeParkingArea], Never>
+        let convertedLocation: AnyPublisher<NavigationData, Never>
     }
     
     private var cancellables = Set<AnyCancellable>()
@@ -33,8 +35,9 @@ final class MapViewModel: ObservableObject {
         let dangerPub = PassthroughSubject<[DangerAnnotation], Never>()
         let addressPub = PassthroughSubject<String, Never>()
         let parkingPub = PassthroughSubject<[SafeParkingArea], Never>()
+        let convertedAddressPub = PassthroughSubject<NavigationData, Never>()
         
-        //        print(realm.configuration.fileURL!) *for debbuging
+        print(realm.configuration.fileURL!) //**for debbuging
         
         input.currentLocation
             .flatMap { location in
@@ -111,12 +114,44 @@ final class MapViewModel: ObservableObject {
             }
             .store(in: &cancellables)
         
+        input.selectedParking
+            .filter { $0.latitude != nil && $0.longitude != nil }
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .flatMap { [weak self] info in
+                NetworkManager.shared.callRequest(KakaoRouter.transcoord(lat: info.latitude!, lot: info.longitude!), decodeType: CoordConvertResponse.self)
+                    .tryMap { response in
+                        guard let result = response.documents.first else {
+                            throw URLError(.badServerResponse)
+                        }
+                        
+                        return NavigationData(
+                            title: info.address,
+                            x: "\(result.x)",
+                            y: "\(result.y)"
+                        )
+                    }
+                    .eraseToAnyPublisher()
+            }.sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    print("좌표 변환 실패: \(error)")
+                }
+            }, receiveValue: { navigationData in
+                convertedAddressPub.send(navigationData)
+            })
+            .store(in: &cancellables)
+        
         return Output(
             safeAnnotations: safePub.eraseToAnyPublisher(),
             dangerAnnotations: dangerPub.eraseToAnyPublisher(),
             addressInformation: addressPub.eraseToAnyPublisher(),
-            parkingInformation: parkingPub.eraseToAnyPublisher()
+            parkingInformation: parkingPub.eraseToAnyPublisher(),
+            convertedLocation: convertedAddressPub.eraseToAnyPublisher()
         )
     }
 }
 
+struct NavigationData {
+    var title : String
+    var x: String
+    var y: String
+}

@@ -9,6 +9,7 @@ import UIKit
 import MapKit
 import CoreLocation
 import Combine
+import KakaoSDKNavi
 
 final class MapViewController: UIViewController {
     
@@ -22,6 +23,7 @@ final class MapViewController: UIViewController {
     private let currentLocationSubject = CurrentValueSubject<CLLocation, Never>(.init())
     private let currentCenterSubject = CurrentValueSubject<CLLocationCoordinate2D, Never>(.init())
     private let currentAltitudeSubject = CurrentValueSubject<CLLocationDistance, Never>(0)
+    private let selectedParkingSubject = CurrentValueSubject<SafeParkingArea, Never>(.init())
     
     private let zoneRadius: CLLocationDistance = 50 // overlayRadius for presentation
     
@@ -68,7 +70,8 @@ final class MapViewController: UIViewController {
         let input = MapViewModel.Input(
             currentCenter: currentCenterSubject.eraseToAnyPublisher(),
             currentAltitude: currentAltitudeSubject.eraseToAnyPublisher(),
-            currentLocation: currentLocationSubject.eraseToAnyPublisher()
+            currentLocation: currentLocationSubject.eraseToAnyPublisher(),
+            selectedParking: selectedParkingSubject.eraseToAnyPublisher()
         )
         
         let output = viewModel.bind(input: input)
@@ -98,6 +101,14 @@ final class MapViewController: UIViewController {
             .receive(on: RunLoop.main)
             .sink { [weak self] parkings in
                 self?.updateCollection(with: parkings)
+            }.store(in: &cancellables)
+        
+        output.convertedLocation
+            .receive(on: RunLoop.main)
+            .sink{ [weak self] navigationData in
+                dump(navigationData)
+                self?.goToNavigation(with: navigationData)
+                
             }.store(in: &cancellables)
     }
     
@@ -248,9 +259,10 @@ extension MapViewController: MKMapViewDelegate {
 }
 
 //MARK: - CollectionView related
-extension MapViewController: UICollectionViewDataSource {
+extension MapViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     
     func setupCollectionView() {
+        bottomView.collectionView.delegate = self
         bottomView.collectionView.dataSource = self
         bottomView.collectionView.register(ParkingInfoCell.self, forCellWithReuseIdentifier: ParkingInfoCell.reuseIdentifier)
     }
@@ -276,5 +288,28 @@ extension MapViewController: UICollectionViewDataSource {
         return cell
     }
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let item = parkingInfo[indexPath.item]
+        
+        selectedParkingSubject.send(item)
+    }
 }
+
+//MARK: - Actions
+extension MapViewController {
+    func goToNavigation(with data: NavigationData ) {
+        let destination = NaviLocation(name: data.title, x: data.x, y: data.y)
+        
+        guard let navigateUrl = NaviApi.shared.navigateUrl(destination: destination) else {
+            return
+        }
+
+        if UIApplication.shared.canOpenURL(navigateUrl) {
+            UIApplication.shared.open(navigateUrl, options: [:], completionHandler: nil)
+        } else {
+            UIApplication.shared.open(NaviApi.webNaviInstallUrl, options: [:], completionHandler: nil)
+        }
+    }
+}
+
 
