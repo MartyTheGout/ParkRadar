@@ -25,6 +25,9 @@ final class MapViewController: UIViewController {
     private let currentAltitudeSubject = CurrentValueSubject<CLLocationDistance, Never>(0)
     private let selectedParkingSubject = CurrentValueSubject<SafeParkingArea, Never>(.init())
     
+    private let safeFilterSubject = CurrentValueSubject<Bool, Never>(true)
+    private let dangerFilterSubject = CurrentValueSubject<Bool, Never>(true)
+    
     private let zoneRadius: CLLocationDistance = 50 // overlayRadius for presentation
     
     private var parkingInfo:[SafeParkingArea] = []
@@ -58,6 +61,9 @@ final class MapViewController: UIViewController {
         
         mainView.mapView.delegate = self
         mainView.mapView.showsUserLocation = true
+        
+        mainView.dangerFilterButton.addTarget(self, action: #selector(toggleDangerFilter), for: .touchUpInside)
+        mainView.safeFilterButton.addTarget(self, action: #selector(toggleSafeFilter), for: .touchUpInside)
     }
     
     private func setupLocationManager() {
@@ -71,7 +77,9 @@ final class MapViewController: UIViewController {
             currentCenter: currentCenterSubject.eraseToAnyPublisher(),
             currentAltitude: currentAltitudeSubject.eraseToAnyPublisher(),
             currentLocation: currentLocationSubject.eraseToAnyPublisher(),
-            selectedParking: selectedParkingSubject.eraseToAnyPublisher()
+            selectedParking: selectedParkingSubject.eraseToAnyPublisher(),
+            safeFilter: safeFilterSubject.eraseToAnyPublisher(),
+            dangerFilter: dangerFilterSubject.eraseToAnyPublisher()
         )
         
         let output = viewModel.bind(input: input)
@@ -110,18 +118,20 @@ final class MapViewController: UIViewController {
                 self?.goToNavigation(with: navigationData)
                 
             }.store(in: &cancellables)
+        
     }
     
     private func updateAnnotations<T: MKAnnotation>(ofType type: T.Type, with newAnnotations: [T]) {
         let existing = mainView.mapView.annotations.compactMap { $0 as? T }
-        mainView.mapView.removeAnnotations(existing)
         
         let overlaysToRemove = mainView.mapView.overlays.compactMap { $0 as? MKCircle }.filter { circle in
-            newAnnotations.contains { annotation in
+            existing.contains { annotation in
                 circle.coordinate.latitude == annotation.coordinate.latitude &&
                 circle.coordinate.longitude == annotation.coordinate.longitude
             }
         }
+        
+        mainView.mapView.removeAnnotations(existing)
         mainView.mapView.removeOverlays(overlaysToRemove)
         
         mainView.mapView.addAnnotations(newAnnotations)
@@ -143,7 +153,6 @@ extension MapViewController {
         
         UINavigationBar.appearance().standardAppearance = appearance
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
-        
     }
 }
 
@@ -219,10 +228,8 @@ extension MapViewController: MKMapViewDelegate {
             } else {
                 view.glyphText = "!"
             }
-            
             return view
         }
-        
         return nil
     }
     
@@ -303,12 +310,22 @@ extension MapViewController {
         guard let navigateUrl = NaviApi.shared.navigateUrl(destination: destination) else {
             return
         }
-
+        
         if UIApplication.shared.canOpenURL(navigateUrl) {
             UIApplication.shared.open(navigateUrl, options: [:], completionHandler: nil)
         } else {
             UIApplication.shared.open(NaviApi.webNaviInstallUrl, options: [:], completionHandler: nil)
         }
+    }
+    
+    @objc func toggleSafeFilter() {
+        let newValue = !safeFilterSubject.value
+        safeFilterSubject.send(newValue)
+    }
+    
+    @objc func toggleDangerFilter() {
+        let newValue = !dangerFilterSubject.value
+        dangerFilterSubject.send(newValue)
     }
 }
 
