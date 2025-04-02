@@ -30,7 +30,7 @@ protocol APIRouter {
 extension APIRouter {
     func asURLRequest() throws -> URLRequest {
         var url = baseURL.appendingPathComponent(path)
-
+        
         if let queryParameters = queryParameters {
             var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
             components?.queryItems = queryParameters.map { URLQueryItem(name: $0.key, value: $0.value) }
@@ -38,11 +38,12 @@ extension APIRouter {
                 url = finalURL
             }
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         request.httpBody = body
         headers?.forEach { request.addValue($0.value, forHTTPHeaderField: $0.key) }
+        
         return request
     }
 }

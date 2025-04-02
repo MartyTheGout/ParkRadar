@@ -2,8 +2,16 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>(Required) The location feature is necessary for providing parking-inhibitory area, available parking space information based on user&apos;s location </string>
+	<key>APP_KEY</key>
+	<string>$(APP_KEY)</string>
+	<key>REST_API_KEY</key>
+	<string>$(REST_API_KEY)</string>
+	<key>LOCATION_BASE_URL</key>
+	<string>$(LOCATION_BASE_URL)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>kakaonavi-sdk</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -14,6 +14,7 @@
 		40B7F2B92D99095A00BCF577 /* fetch_and_save.sh in Resources */ = {isa = PBXBuildFile; fileRef = 40B7F2B82D99095A00BCF577 /* fetch_and_save.sh */; };
 		40B7F2BB2D99096C00BCF577 /* source_monitor.json in Resources */ = {isa = PBXBuildFile; fileRef = 40B7F2BA2D99096C00BCF577 /* source_monitor.json */; };
 		40B7F2BF2D990B7300BCF577 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 40B7F2BE2D990B7300BCF577 /* README.md */; };
+		40B7F8E52D9D1FA900BCF577 /* KakaoSDKNavi in Frameworks */ = {isa = PBXBuildFile; productRef = 40B7F8E42D9D1FA900BCF577 /* KakaoSDKNavi */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -64,6 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40B7F8E52D9D1FA900BCF577 /* KakaoSDKNavi in Frameworks */,
 				40B7F2032D98F7BF00BCF577 /* RealmSwift in Frameworks */,
 				40B7F2002D98F74200BCF577 /* SnapKit in Frameworks */,
 			);
@@ -115,6 +117,7 @@
 			packageProductDependencies = (
 				40B7F1FF2D98F74200BCF577 /* SnapKit */,
 				40B7F2022D98F7BF00BCF577 /* RealmSwift */,
+				40B7F8E42D9D1FA900BCF577 /* KakaoSDKNavi */,
 			);
 			productName = ParkRadar;
 			productReference = 40B7EAC22D93F21800BCF577 /* ParkRadar.app */;
@@ -147,6 +150,7 @@
 			packageReferences = (
 				40B7F1FE2D98F74200BCF577 /* XCRemoteSwiftPackageReference "SnapKit" */,
 				40B7F2012D98F7BF00BCF577 /* XCRemoteSwiftPackageReference "realm-swift" */,
+				40B7F8E32D9D1FA900BCF577 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 40B7EAC32D93F21800BCF577 /* Products */;
@@ -185,6 +189,8 @@
 /* Begin XCBuildConfiguration section */
 		40B7EAD62D93F21900BCF577 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 40B7EAC42D93F21800BCF577 /* ParkRadar */;
+			baseConfigurationReferenceRelativePath = Resource/Authorization.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -195,6 +201,7 @@
 				INFOPLIST_FILE = ParkRadar/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Park Radar";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "(Required) The location feature is necessary for providing parking-inhibitory area, available parking space information based on user's location ";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
@@ -220,6 +227,8 @@
 		};
 		40B7EAD72D93F21900BCF577 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 40B7EAC42D93F21800BCF577 /* ParkRadar */;
+			baseConfigurationReferenceRelativePath = Resource/Authorization.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -230,6 +239,7 @@
 				INFOPLIST_FILE = ParkRadar/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Park Radar";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "(Required) The location feature is necessary for providing parking-inhibitory area, available parking space information based on user's location ";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
@@ -412,6 +422,14 @@
 				version = 10.54.3;
 			};
 		};
+		40B7F8E32D9D1FA900BCF577 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kakao/kakao-ios-sdk";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -424,6 +442,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 40B7F2012D98F7BF00BCF577 /* XCRemoteSwiftPackageReference "realm-swift" */;
 			productName = RealmSwift;
+		};
+		40B7F8E42D9D1FA900BCF577 /* KakaoSDKNavi */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 40B7F8E32D9D1FA900BCF577 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKNavi;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
