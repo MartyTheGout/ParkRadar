@@ -12,9 +12,15 @@ enum Color {
         case main = "F8F4EC"
         
         var ui: UIColor {
-            switch self {
-            case .main : return UIColor(hex: self.rawValue)
-            }
+            UIColor(hex: self.rawValue)
+        }
+    }
+    
+    enum Subject : String {
+        case safe = "34C759"
+        
+        var ui: UIColor {
+            UIColor(hex: self.rawValue)
         }
     }
 }
