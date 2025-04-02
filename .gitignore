@@ -105,6 +105,7 @@ fetch_and_save_free.sh
 output/
 output_park_info/
 
+Authorization.xcconfig
 
 # End of https://www.toptal.com/developers/gitignore/api/swift
 
