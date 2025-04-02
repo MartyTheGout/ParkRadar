@@ -5,56 +5,98 @@ import CoreLocation
 import MapKit
 
 final class MapViewModel: ObservableObject {
+    
+    let geocodingService = GeocodingService()
+    
     struct Input {
         let currentCenter: AnyPublisher<CLLocationCoordinate2D, Never>
         let currentAltitude: AnyPublisher<CLLocationDistance, Never>
+        let currentLocation: AnyPublisher<CLLocation, Never>
     }
-
+    
     struct Output {
         let safeAnnotations: AnyPublisher<[SafeAnnotation], Never>
         let dangerAnnotations: AnyPublisher<[DangerAnnotation], Never>
+        let addressInformation: AnyPublisher<String, Never>
+        let parkingInformation: AnyPublisher<[SafeParkingArea], Never>
     }
-
+    
     private var cancellables = Set<AnyCancellable>()
     private let realm = try! Realm()
-
+    
     func bind(input: Input) -> Output {
         let locationAndZoom = input.currentCenter
             .combineLatest(input.currentAltitude)
             .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
-
+        
         let safePub = PassthroughSubject<[SafeAnnotation], Never>()
         let dangerPub = PassthroughSubject<[DangerAnnotation], Never>()
-
+        let addressPub = PassthroughSubject<String, Never>()
+        let parkingPub = PassthroughSubject<[SafeParkingArea], Never>()
+        
+        //        print(realm.configuration.fileURL!) *for debbuging
+        
+        input.currentLocation
+            .flatMap { location in
+                self.geocodingService.reverseGeocode(location: location)
+            }
+            .sink { address in
+                print(address)
+                if let address {
+                    print("address reverse geocoding called")
+                    addressPub.send(address)
+                }
+            }
+            .store(in: &cancellables)
+        
+        
         locationAndZoom
             .sink { [weak self] (center, altitude) in
                 guard let self = self else { return }
-
+                
                 let isZoomedIn = altitude < 3000 // Temporary Zoom at this point, need to be fixed later
-
+                
                 if isZoomedIn {
                     let latMin = Int((center.latitude - 0.01) * 1000)
                     let latMax = Int((center.latitude + 0.01) * 1000)
                     let lngMin = Int((center.longitude - 0.01) * 1000)
                     let lngMax = Int((center.longitude + 0.01) * 1000)
-
+                    
+                    let centerLatIndex = Int(center.latitude * 1000)
+                    let centerLngIndex = Int(center.longitude * 1000)
+                    
                     let safeObjects = self.realm.objects(SafeParkingArea.self)
                         .where {
                             $0.latIndex >= latMin && $0.latIndex <= latMax &&
                             $0.lngIndex >= lngMin && $0.lngIndex <= lngMax
                         }
-
+                    
                     let dangerObjects = self.realm.objects(NoParkingArea.self)
                         .where {
                             $0.latInt >= latMin && $0.latInt <= latMax &&
                             $0.lngInt >= lngMin && $0.lngInt <= lngMax
                         }
-
+                    
                     let safeAnnotations: [SafeAnnotation] = safeObjects.compactMap { SafeAnnotation(from: $0) }
                     let dangerAnnotations: [DangerAnnotation] = dangerObjects.compactMap { DangerAnnotation(from: $0) }
-
+                    
+                    let sortedNearbyObjects = safeObjects
+                        .filter { obj in
+                            obj.latIndex != nil && obj.latIndex != nil
+                        }
+                        .map { obj in
+                            let dLat = obj.latIndex! - centerLatIndex
+                            let dLng = obj.lngIndex! - centerLngIndex
+                            let distance = dLat * dLat + dLng * dLng // 유클리디안 거리 제곱
+                            return (object: obj, distance: distance)
+                        }
+                        .sorted(by: { $0.distance < $1.distance })
+                        .prefix(20)
+                        .map { $0.object }
+                    
                     safePub.send(safeAnnotations)
                     dangerPub.send(dangerAnnotations)
+                    parkingPub.send(sortedNearbyObjects)
                     
                     print("중심 위치: \(center.latitude), \(center.longitude)")
                     print("lat 범위: \(latMin) ~ \(latMax)")
@@ -62,16 +104,18 @@ final class MapViewModel: ObservableObject {
                     print("찾은 주차장 개수: \(safeObjects.count)")
                     print("찾은 금지구역 개수: \(dangerObjects.count)")
                 } else {
-                    // for zoom-out, only emits clustering info. 
+                    // for zoom-out, only emits clustering info.
                     safePub.send([])
                     dangerPub.send([])
                 }
             }
             .store(in: &cancellables)
-
+        
         return Output(
             safeAnnotations: safePub.eraseToAnyPublisher(),
-            dangerAnnotations: dangerPub.eraseToAnyPublisher()
+            dangerAnnotations: dangerPub.eraseToAnyPublisher(),
+            addressInformation: addressPub.eraseToAnyPublisher(),
+            parkingInformation: parkingPub.eraseToAnyPublisher()
         )
     }
 }
