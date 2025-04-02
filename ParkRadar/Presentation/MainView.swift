@@ -22,7 +22,7 @@ class MainView: UIView {
     
     let safeFilterButton = {
         let button = UIButton()
-        button.configuration = .horizontalStyle(title: "서울시\n공영주차장", imageName: "car.2.fill", tintColor: .green)
+        button.configuration = .horizontalStyle(title: "서울시\n공영주차장", imageName: "car.2.fill", tintColor: Color.Subject.safe.ui)
         button.backgroundColor = .white.withAlphaComponent(0.9)
         return button
     }()
@@ -83,9 +83,9 @@ class MainView: UIView {
             $0.layer.shadowRadius = 3
             $0.layer.shadowOpacity = 0.3
             $0.layer.shadowPath = UIBezierPath(
-                    roundedRect: $0.bounds,
-                    cornerRadius: $0.layer.cornerRadius
-                ).cgPath
+                roundedRect: $0.bounds,
+                cornerRadius: $0.layer.cornerRadius
+            ).cgPath
         }
     }
 }
