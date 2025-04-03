@@ -65,4 +65,15 @@ extension UIButton.Configuration {
 
         return config
     }
+    
+    static func bigIconStyle(imageName: String, tintColor: UIColor) -> UIButton.Configuration {
+        var config = UIButton.Configuration.plain()
+        config.image = UIImage(systemName: imageName)
+        config.imagePlacement = .top
+        config.baseForegroundColor = tintColor
+        
+        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 24, weight: .medium)
+
+        return config
+    }
 }
