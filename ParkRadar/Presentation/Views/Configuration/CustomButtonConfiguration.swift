@@ -52,4 +52,17 @@ extension UIButton.Configuration {
 
         return config
     }
+    
+    static func iconStyle(imageName: String, tintColor: UIColor) -> UIButton.Configuration {
+        var config = UIButton.Configuration.plain()
+        config.image = UIImage(systemName: imageName)?.withTintColor(tintColor)
+        config.imagePlacement = .top
+        config.baseForegroundColor = tintColor
+
+        config.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12)
+        
+        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+
+        return config
+    }
 }

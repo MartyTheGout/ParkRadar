@@ -69,6 +69,7 @@ final class MapViewController: UIViewController {
         
         mainView.dangerFilterButton.addTarget(self, action: #selector(toggleDangerFilter), for: .touchUpInside)
         mainView.safeFilterButton.addTarget(self, action: #selector(toggleSafeFilter), for: .touchUpInside)
+        mainView.userLocationButton.addTarget(self, action: #selector(moveMapViewToCurrentLocation), for: .touchUpInside)
     }
     
     private func setupLocationManager() {
@@ -379,6 +380,25 @@ extension MapViewController {
         let newValue = !dangerFilterSubject.value
         dangerFilterSubject.send(newValue)
     }
+    
+    @objc private func moveMapViewToCurrentLocation() {
+        let status = locationManager.authorizationStatus
+
+        guard status == .authorizedWhenInUse || status == .authorizedAlways,
+              let location = locationManager.location else {
+            print("위치 정보 없음 또는 권한 미허용")
+            return
+        }
+
+        let camera = MKMapCamera()
+        camera.centerCoordinate = location.coordinate
+        camera.altitude = 2000
+        camera.pitch = 0
+        camera.heading = 0
+
+        mainView.mapView.setCamera(camera, animated: true)
+    }
+
     
     @objc func goToFineDetailViewController() {
         let destinationVC = FineDetailViewController()

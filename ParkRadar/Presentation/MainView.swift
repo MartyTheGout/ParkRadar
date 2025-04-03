@@ -27,6 +27,13 @@ class MainView: UIView {
         return button
     }()
     
+    let userLocationButton: UIButton = {
+        let button = UIButton()
+        button.configuration = .iconStyle(imageName: "location.fill", tintColor: .black)
+        button.backgroundColor = .white.withAlphaComponent(0.9)
+        return button
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         configureViewHierarchy()
@@ -43,6 +50,7 @@ class MainView: UIView {
         addSubview(upperTabView)
         addSubview(dangerFilterButton)
         addSubview(safeFilterButton)
+        addSubview(userLocationButton)
     }
     
     func configureViewConstraints() {
@@ -66,6 +74,11 @@ class MainView: UIView {
             $0.top.equalTo(upperTabView.snp.bottom).offset(4)
             $0.leading.equalTo(dangerFilterButton.snp.trailing).offset(8)
         }
+        
+        userLocationButton.snp.makeConstraints {
+            $0.top.equalTo(upperTabView.snp.bottom).offset(4)
+            $0.trailing.equalTo(safeAreaLayoutGuide).offset(-8)
+        }
     }
     
     func configureViewDetails() {
@@ -75,7 +88,7 @@ class MainView: UIView {
     override func draw(_ rect: CGRect) {
         super.draw(rect)
         
-        [safeFilterButton, dangerFilterButton].forEach {
+        [safeFilterButton, dangerFilterButton, userLocationButton].forEach {
             $0.layer.cornerRadius = 10
             $0.layer.masksToBounds = false
             $0.layer.shadowColor = UIColor.black.cgColor
