@@ -43,6 +43,7 @@ final class MapViewController: UIViewController {
         setupLocationManager()
         bindViewModel()
         setupCollectionView()
+        setupTopButtonAction()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -53,6 +54,10 @@ final class MapViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         bottomView.attach(to: self.view)
+    }
+    
+    private func setupTopButtonAction() {
+        mainView.upperTabView.illegalExplanationButton.addTarget(self, action: #selector(goToFineDetailViewController), for: .touchUpInside)
     }
     
     private func setupMapView() {
@@ -169,9 +174,12 @@ extension MapViewController {
         
         appearance.backgroundColor = Color.Back.main.ui
         appearance.shadowColor = .clear
+
+        appearance.backgroundEffect = UIBlurEffect(style: .light)
         
-        UINavigationBar.appearance().standardAppearance = appearance
-        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
     }
 }
 
@@ -370,6 +378,13 @@ extension MapViewController {
     @objc func toggleDangerFilter() {
         let newValue = !dangerFilterSubject.value
         dangerFilterSubject.send(newValue)
+    }
+    
+    @objc func goToFineDetailViewController() {
+        let destinationVC = FineDetailViewController()
+        navigationItem.backButtonTitle = ""
+        
+        navigationController?.pushViewController(destinationVC, animated: true)
     }
 }
 
