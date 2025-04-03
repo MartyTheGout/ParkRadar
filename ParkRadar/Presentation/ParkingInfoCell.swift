@@ -76,6 +76,5 @@ final class ParkingInfoCell: UICollectionViewCell {
     func configure(with data : SafeParkingArea) {
         titleLabel.text = data.name
         subtitleLabel.text = data.address
-//        iconView.image = UIImage(systemName: symbolName)
     }
 }

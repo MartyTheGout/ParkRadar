@@ -98,6 +98,13 @@ final class MapViewController: UIViewController {
             }
             .store(in: &cancellables)
         
+        output.clusters
+            .receive(on: RunLoop.main)
+            .sink { [weak self] clusterAnnotations in
+                self?.updateAnnotations(ofType: ClusterAnnotation.self, with: clusterAnnotations)
+            }
+            .store(in: &cancellables)
+        
         output.addressInformation
             .receive(on: RunLoop.main)
             .sink { [weak self] address in
@@ -122,22 +129,34 @@ final class MapViewController: UIViewController {
     }
     
     private func updateAnnotations<T: MKAnnotation>(ofType type: T.Type, with newAnnotations: [T]) {
+        
         let existing = mainView.mapView.annotations.compactMap { $0 as? T }
         
+        let toAdd = newAnnotations.filter { new in
+            !existing.contains(where: { $0.coordinate.latitude == new.coordinate.latitude && $0.coordinate.longitude == new.coordinate.longitude })
+        }
+        
+        let toRemove = existing.filter { existingAnno in
+            !newAnnotations.contains(where: { $0.coordinate.latitude == existingAnno.coordinate.latitude && $0.coordinate.longitude == existingAnno.coordinate.longitude })
+        }
+        
+        mainView.mapView.removeAnnotations(toRemove)
+        
         let overlaysToRemove = mainView.mapView.overlays.compactMap { $0 as? MKCircle }.filter { circle in
-            existing.contains { annotation in
+            toRemove.contains { annotation in
                 circle.coordinate.latitude == annotation.coordinate.latitude &&
                 circle.coordinate.longitude == annotation.coordinate.longitude
             }
         }
         
-        mainView.mapView.removeAnnotations(existing)
         mainView.mapView.removeOverlays(overlaysToRemove)
         
-        mainView.mapView.addAnnotations(newAnnotations)
+        mainView.mapView.addAnnotations(toAdd)
         
-        for annotation in newAnnotations {
-            let circle = MKCircle(center: annotation.coordinate, radius: zoneRadius)
+        let radius = type is ClusterAnnotation.Type ? 1800 : zoneRadius
+        
+        for annotation in toAdd {
+            let circle = MKCircle(center: annotation.coordinate, radius: radius)
             mainView.mapView.addOverlay(circle)
         }
     }
@@ -169,7 +188,6 @@ extension MapViewController: CLLocationManagerDelegate {
         currentLocationSubject.send(location)
         currentCenterSubject.send(coordinate)
         currentAltitudeSubject.send(mainView.mapView.camera.altitude)
-        print("altitude : \(mainView.mapView.camera.altitude)")
         
         mainView.mapView.camera.centerCoordinateDistance = 2000 // customize intial altitude of the camera.
         
@@ -184,6 +202,20 @@ extension MapViewController: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         if annotation is MKUserLocation {
             return nil
+        }
+        
+        if let cluster = annotation as? ClusterAnnotation {
+            let identifier = "Cluster"
+            let view = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
+            ?? MKMarkerAnnotationView(annotation: cluster, reuseIdentifier: identifier)
+        
+            view.canShowCallout = true
+            view.clusteringIdentifier = "parkingCluster"
+            view.markerTintColor = cluster.identifier == "safeCluster" ? Color.Subject.safe.ui : .systemRed
+            
+            view.glyphImage = cluster.identifier == "safeCluster" ? UIImage(systemName: "car.2.fill") : UIImage(systemName: "eye.fill") // ! glyphImage is applied to Annotation firstly, then glyphText
+            
+            return view
         }
         
         if let cluster = annotation as? MKClusterAnnotation {
@@ -230,6 +262,7 @@ extension MapViewController: MKMapViewDelegate {
             }
             return view
         }
+        
         return nil
     }
     
@@ -240,9 +273,19 @@ extension MapViewController: MKMapViewDelegate {
         }
         
         let isDanger = mapView.annotations.contains(where: { annotation in
-            guard let danger = annotation as? DangerAnnotation else { return false }
-            return danger.coordinate.latitude == circle.coordinate.latitude &&
-            danger.coordinate.longitude == circle.coordinate.longitude
+            if let danger = annotation as? DangerAnnotation {
+                return danger.coordinate.latitude == circle.coordinate.latitude &&
+                danger.coordinate.longitude == circle.coordinate.longitude
+            }
+            
+            if let danger = annotation as? ClusterAnnotation {
+                if danger.identifier == "dangerCluster" {
+                    return danger.coordinate.latitude == circle.coordinate.latitude &&
+                    danger.coordinate.longitude == circle.coordinate.longitude
+                }
+            }
+            
+            return false
         })
         
         let renderer = MKCircleRenderer(circle: circle)
@@ -262,6 +305,7 @@ extension MapViewController: MKMapViewDelegate {
     func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
         currentCenterSubject.send(mapView.centerCoordinate)
         currentAltitudeSubject.send(mapView.camera.altitude)
+//        print("altitude : \(mapView.camera.altitude)")
     }
 }
 

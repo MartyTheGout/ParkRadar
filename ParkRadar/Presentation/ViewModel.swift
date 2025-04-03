@@ -4,7 +4,7 @@ import RealmSwift
 import CoreLocation
 import MapKit
 
-final class MapViewModel: ObservableObject {
+final class MapViewModel {
     
     let geocodingService = GeocodingService()
     
@@ -22,6 +22,9 @@ final class MapViewModel: ObservableObject {
     struct Output {
         let safeAnnotations: AnyPublisher<[SafeAnnotation], Never>
         let dangerAnnotations: AnyPublisher<[DangerAnnotation], Never>
+        
+        let clusters: AnyPublisher<[ClusterAnnotation], Never>
+        
         let addressInformation: AnyPublisher<String, Never>
         let parkingInformation: AnyPublisher<[SafeParkingArea], Never>
         let convertedLocation: AnyPublisher<NavigationData, Never>
@@ -33,7 +36,6 @@ final class MapViewModel: ObservableObject {
     let latestLocationAndZoom = CurrentValueSubject<(CLLocationCoordinate2D, CLLocationDistance), Never>((.init(), 0))
     
     private var cancellables = Set<AnyCancellable>()
-    private let realm = try! Realm()
     
     func bind(input: Input) -> Output {
         let locationAndZoom = input.currentCenter
@@ -42,6 +44,9 @@ final class MapViewModel: ObservableObject {
         
         let safePub = PassthroughSubject<[SafeAnnotation], Never>()
         let dangerPub = PassthroughSubject<[DangerAnnotation], Never>()
+        
+        let clusterPub = PassthroughSubject<[ClusterAnnotation], Never>()
+        
         let addressPub = PassthroughSubject<String, Never>()
         let parkingPub = PassthroughSubject<[SafeParkingArea], Never>()
         let convertedAddressPub = PassthroughSubject<NavigationData, Never>()
@@ -49,14 +54,13 @@ final class MapViewModel: ObservableObject {
         let safeFilterPub = CurrentValueSubject<Bool, Never>(true)
         let dangerFilterPub = CurrentValueSubject<Bool, Never>(true)
         
-        //        print(realm.configuration.fileURL!) //**for debbuging
+        repository.showFilePath() //for debugging
         
         input.currentLocation
             .flatMap { location in
                 self.geocodingService.reverseGeocode(location: location)
             }
             .sink { address in
-                print(address)
                 if let address {
                     print("address reverse geocoding called")
                     addressPub.send(address)
@@ -75,15 +79,17 @@ final class MapViewModel: ObservableObject {
         safeFilterPub
             .sink { [weak self] filter in
                 guard let self = self else { return }
-
+                
                 let (center, altitude) = self.latestLocationAndZoom.value
-                let isZoomedIn = altitude < 3000
-                if isZoomedIn {
-                    let safeObjects = repository.getSafeArea(latitude: center.latitude, longitude: center.longitude)
-                    let safeAnnotations: [SafeAnnotation] = safeObjects.compactMap { SafeAnnotation(from: $0) }
-                    safePub.send(filter ? safeAnnotations : [])
+                
+                let safeObjects = repository.getSafeArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
+                let safeAnnotations: [SafeAnnotation] = safeObjects.compactMap { SafeAnnotation(from: $0) }
+                
+                //클러스터를 고려해야한다.
+                if altitude > 10000 {
+                    
                 } else {
-                    safePub.send([])
+                    safePub.send(filter ? safeAnnotations : [])
                 }
             }
             .store(in: &cancellables)
@@ -91,64 +97,98 @@ final class MapViewModel: ObservableObject {
         dangerFilterPub
             .sink { [weak self] filter in
                 guard let self = self else { return }
-
+                
                 let (center, altitude) = self.latestLocationAndZoom.value
-                let isZoomedIn = altitude < 3000
-                if isZoomedIn {
-                    let dangerObjects = repository.getDangerArea(latitude: center.latitude, longitude: center.longitude)
-                    let dangerAnnotations: [DangerAnnotation] = dangerObjects.compactMap { DangerAnnotation(from: $0) }
-                    dangerPub.send(filter ? dangerAnnotations : [])
-                } else {
-                    dangerPub.send([])
-                }
+                
+                
+                let dangerObjects = repository.getDangerArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
+                let dangerAnnotations: [DangerAnnotation] = dangerObjects.compactMap { DangerAnnotation(from: $0) }
+                dangerPub.send(filter ? dangerAnnotations : [])
+                
             }
             .store(in: &cancellables)
         
         locationAndZoom
             .handleEvents(receiveOutput: { [weak latestLocationAndZoom] value in
-                    latestLocationAndZoom?.send(value)
-                })
+                latestLocationAndZoom?.send(value)
+            })
             .sink { [weak self] (center, altitude) in
                 guard let self = self else { return }
                 
-                let isZoomedIn = altitude < 3000 // Temporary Zoom at this point, need to be fixed later
-                
-                if isZoomedIn {
-                    let safeObjects = repository.getSafeArea(latitude: center.latitude, longitude: center.longitude)
-                    let dangerObjects = repository.getDangerArea(latitude: center.latitude, longitude: center.longitude)
+                if altitude <= 10000 {
+                    clusterPub.send([])
+                    
+                    let safeObjects = repository.getSafeArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
+                    let dangerObjects = repository.getDangerArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
                     
                     let safeAnnotations: [SafeAnnotation] = safeObjects.compactMap { SafeAnnotation(from: $0) }
                     let dangerAnnotations: [DangerAnnotation] = dangerObjects.compactMap { DangerAnnotation(from: $0) }
                     
-                    let centerLatIndex = Int(center.latitude * 1000)
-                    let centerLngIndex = Int(center.longitude * 1000)
                     
-                    let sortedNearbyObjects = safeObjects
-                        .filter { obj in
-                            obj.latIndex != nil && obj.latIndex != nil
-                        }
-                        .map { obj -> (object: SafeParkingArea, distance: Int) in
-                            let dLat = obj.latIndex! - centerLatIndex
-                            let dLng = obj.lngIndex! - centerLngIndex
-                            let distance = dLat * dLat + dLng * dLng // 유클리디안 거리 제곱
-                            return (object: obj, distance: distance)
-                        }
-                        .sorted(by: { $0.distance < $1.distance })
-                        .prefix(20)
-                        .map { $0.object }
+                    
+                    let sortedNearbyObjects = repository.getClosestParkingAreas(latitude: center.latitude, longitude: center.longitude)
                     
                     safePub.send(safeFilterPub.value ? safeAnnotations : [])
                     dangerPub.send(dangerFilterPub.value ? dangerAnnotations : [])
                     
                     parkingPub.send(sortedNearbyObjects)
                     
-                    print("중심 위치: \(center.latitude), \(center.longitude)")
-                    print("찾은 주차장 개수: \(safeObjects.count)")
-                    print("찾은 금지구역 개수: \(dangerObjects.count)")
+                    //                print("중심 위치: \(center.latitude), \(center.longitude)")
+                    //                print("찾은 주차장 개수: \(safeObjects.count)")
+                    //                print("찾은 금지구역 개수: \(dangerObjects.count)")
                 } else {
-                    // for zoom-out, only emits clustering info.
                     safePub.send([])
                     dangerPub.send([])
+                    
+                    let precision = 5 // altitude에 따라 동적으로 조절 가능
+                    let safeAll = repository.getSafeAreaCluster()
+                    let dangeAll = repository.getDangerAreaCluster()
+                    
+                    var output : [ClusterAnnotation] = []
+                    
+                    if safeFilterPub.value {
+                        let safeClusters = Dictionary(grouping: safeAll) { obj in
+                            guard let geohash = obj.geohash else { return "" }
+                            return String(geohash.prefix(precision))
+                        }
+                        
+                        let summaries: [ClusterAnnotation] = safeClusters.map { (hash, group) in
+                            let latAvg = group.compactMap { $0.latitude }.average
+                            let lngAvg = group.compactMap { $0.longitude }.average
+                            
+                            let summary = ClusterSummary(
+                                coordinate: CLLocationCoordinate2D(latitude: latAvg, longitude: lngAvg),
+                                count: group.count,
+                                geohash: String(hash)
+                            )
+                            
+                            return ClusterAnnotation(identifier: "safeCluster", coordinate: summary.coordinate, count: summary.count)
+                        }
+                        
+                        output.append(contentsOf: summaries)
+                    }
+                    
+                    if dangerFilterPub.value {
+                        let dangerCluster = Dictionary(grouping: dangeAll) { obj in
+                            obj.geohash.prefix(precision)
+                        }
+                        
+                        let summaries: [ClusterAnnotation] = dangerCluster.map { (hash, group) in
+                            let latAvg = group.compactMap { $0.latitude }.average
+                            let lngAvg = group.compactMap { $0.longitude }.average
+                            let summary = ClusterSummary(
+                                coordinate: CLLocationCoordinate2D(latitude: latAvg, longitude: lngAvg),
+                                count: group.count,
+                                geohash: String(hash)
+                            )
+                            
+                            return ClusterAnnotation(identifier: "dangerCluster", coordinate: summary.coordinate, count: summary.count)
+                        }
+                        
+                        output.append(contentsOf: summaries)
+                    }
+                    
+                    clusterPub.send(output)
                 }
             }
             .store(in: &cancellables)
@@ -182,6 +222,7 @@ final class MapViewModel: ObservableObject {
         return Output(
             safeAnnotations: safePub.eraseToAnyPublisher(),
             dangerAnnotations: dangerPub.eraseToAnyPublisher(),
+            clusters: clusterPub.eraseToAnyPublisher(),
             addressInformation: addressPub.eraseToAnyPublisher(),
             parkingInformation: parkingPub.eraseToAnyPublisher(),
             convertedLocation: convertedAddressPub.eraseToAnyPublisher(),
