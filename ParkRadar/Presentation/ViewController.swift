@@ -204,8 +204,6 @@ extension MapViewController: CLLocationManagerDelegate {
 }
 
 extension MapViewController: MKMapViewDelegate {
-    
-    
     // MARK: - Annotation View
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         if annotation is MKUserLocation {
@@ -313,7 +311,7 @@ extension MapViewController: MKMapViewDelegate {
     func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
         currentCenterSubject.send(mapView.centerCoordinate)
         currentAltitudeSubject.send(mapView.camera.altitude)
-        print("altitude : \(mapView.camera.altitude)")
+        //        print("altitude : \(mapView.camera.altitude)")
     }
 }
 
@@ -410,11 +408,27 @@ extension MapViewController {
     @objc func toggleSafeFilter() {
         let newValue = !safeFilterSubject.value
         safeFilterSubject.send(newValue)
+        
+        var config = mainView.safeFilterButton.configuration ?? UIButton.Configuration.plain()
+            
+        let newImage = UIImage(systemName: "car.2.fill")
+        config.image = newImage
+        config.baseForegroundColor = newValue ? .green : .black
+        
+        mainView.safeFilterButton.configuration = config
     }
     
     @objc func toggleDangerFilter() {
         let newValue = !dangerFilterSubject.value
         dangerFilterSubject.send(newValue)
+        
+        var config = mainView.dangerFilterButton.configuration ?? UIButton.Configuration.plain()
+        
+        let newImage = UIImage(systemName: "eye.fill")
+        config.image = newImage
+        config.baseForegroundColor = newValue ? .red : .black
+        
+        mainView.dangerFilterButton.configuration = config
     }
     
     @objc private func moveMapViewToCurrentLocation() {
