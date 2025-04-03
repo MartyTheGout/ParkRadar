@@ -43,7 +43,6 @@ final class MapViewController: UIViewController {
         setupLocationManager()
         bindViewModel()
         setupCollectionView()
-        setupTopButtonAction()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -56,16 +55,16 @@ final class MapViewController: UIViewController {
         bottomView.attach(to: self.view)
     }
     
-    private func setupTopButtonAction() {
-        mainView.upperTabView.illegalExplanationButton.addTarget(self, action: #selector(goToFineDetailViewController), for: .touchUpInside)
-    }
-    
     private func setupMapView() {
         mainView.mapView.frame = view.bounds
         mainView.mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         
         mainView.mapView.delegate = self
         mainView.mapView.showsUserLocation = true
+        
+        mainView.upperTabView.noParkShowingButton.addTarget(self, action: #selector(zoomOutToSeoulWithDangerZone), for: .touchUpInside)
+        mainView.upperTabView.safeParkShowingButton.addTarget(self, action: #selector(zoomOutToSeoulWithSafeZone), for: .touchUpInside)
+        mainView.upperTabView.illegalExplanationButton.addTarget(self, action: #selector(goToFineDetailViewController), for: .touchUpInside)
         
         mainView.dangerFilterButton.addTarget(self, action: #selector(toggleDangerFilter), for: .touchUpInside)
         mainView.safeFilterButton.addTarget(self, action: #selector(toggleSafeFilter), for: .touchUpInside)
@@ -175,7 +174,7 @@ extension MapViewController {
         
         appearance.backgroundColor = Color.Back.main.ui
         appearance.shadowColor = .clear
-
+        
         appearance.backgroundEffect = UIBlurEffect(style: .light)
         
         navigationController?.navigationBar.standardAppearance = appearance
@@ -217,7 +216,7 @@ extension MapViewController: MKMapViewDelegate {
             let identifier = "Cluster"
             let view = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
             ?? MKMarkerAnnotationView(annotation: cluster, reuseIdentifier: identifier)
-        
+            
             view.canShowCallout = true
             view.clusteringIdentifier = "parkingCluster"
             view.markerTintColor = cluster.identifier == "safeCluster" ? Color.Subject.safe.ui : .systemRed
@@ -314,7 +313,7 @@ extension MapViewController: MKMapViewDelegate {
     func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
         currentCenterSubject.send(mapView.centerCoordinate)
         currentAltitudeSubject.send(mapView.camera.altitude)
-//        print("altitude : \(mapView.camera.altitude)")
+        print("altitude : \(mapView.camera.altitude)")
     }
 }
 
@@ -371,6 +370,43 @@ extension MapViewController {
         }
     }
     
+    @objc private func zoomOutToSeoulWithDangerZone() {
+        let seoulCenter = CLLocationCoordinate2D(latitude: 37.5665, longitude: 126.9780)
+        
+        let camera = MKMapCamera()
+        camera.centerCoordinate = seoulCenter
+        camera.altitude = 130000
+        camera.pitch = 0
+        camera.heading = 0
+        
+        safeFilterSubject.send(false)
+        dangerFilterSubject.send(true)
+        
+        mainView.mapView.setCamera(camera, animated: true)
+    }
+    
+    @objc private func zoomOutToSeoulWithSafeZone() {
+        let seoulCenter = CLLocationCoordinate2D(latitude: 37.5665, longitude: 126.9780)
+        
+        let camera = MKMapCamera()
+        camera.centerCoordinate = seoulCenter
+        camera.altitude = 130000
+        camera.pitch = 0
+        camera.heading = 0
+        
+        safeFilterSubject.send(true)
+        dangerFilterSubject.send(false)
+        
+        mainView.mapView.setCamera(camera, animated: true)
+    }
+    
+    @objc func goToFineDetailViewController() {
+        let destinationVC = FineDetailViewController()
+        navigationItem.backButtonTitle = ""
+        
+        navigationController?.pushViewController(destinationVC, animated: true)
+    }
+    
     @objc func toggleSafeFilter() {
         let newValue = !safeFilterSubject.value
         safeFilterSubject.send(newValue)
@@ -383,29 +419,21 @@ extension MapViewController {
     
     @objc private func moveMapViewToCurrentLocation() {
         let status = locationManager.authorizationStatus
-
+        
         guard status == .authorizedWhenInUse || status == .authorizedAlways,
               let location = locationManager.location else {
             print("위치 정보 없음 또는 권한 미허용")
             return
         }
-
+        
         let camera = MKMapCamera()
         camera.centerCoordinate = location.coordinate
         camera.altitude = 2000
         camera.pitch = 0
         camera.heading = 0
-
+        
+        safeFilterSubject.send(true)
+        dangerFilterSubject.send(true)
         mainView.mapView.setCamera(camera, animated: true)
     }
-
-    
-    @objc func goToFineDetailViewController() {
-        let destinationVC = FineDetailViewController()
-        navigationItem.backButtonTitle = ""
-        
-        navigationController?.pushViewController(destinationVC, animated: true)
-    }
 }
-
-
