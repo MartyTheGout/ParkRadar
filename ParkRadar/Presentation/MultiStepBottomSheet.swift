@@ -29,9 +29,29 @@ final class MultiStepBottomSheet: UIView {
         return view
     }()
     
+    
+    let locationTitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 15, weight: .bold)
+        label.textColor = .label
+        label.textAlignment = .right
+        label.text = "현재 위치"
+        return label
+    }()
+    
     let locationLabel: UILabel = {
         let label = UILabel()
-        
+        label.font = .systemFont(ofSize: 14, weight: .regular)
+        label.textColor = .label
+        return label
+    }()
+    
+    let parkingLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 15, weight: .bold)
+        label.textColor = .label
+        label.textAlignment = .right
+        label.text = "서울시 공영 주차장 안내"
         return label
     }()
     
@@ -60,7 +80,9 @@ final class MultiStepBottomSheet: UIView {
     private func configureViewHierarchy() {
         addSubview(blurView)
         addSubview(grabber)
+        addSubview(locationTitleLabel)
         addSubview(locationLabel)
+        addSubview(parkingLabel)
         addSubview(collectionView)
     }
     
@@ -77,14 +99,23 @@ final class MultiStepBottomSheet: UIView {
             $0.height.equalTo(5)
         }
         
-        locationLabel.snp.makeConstraints{
+        locationTitleLabel.snp.makeConstraints {
             $0.top.equalTo(grabber.snp.bottom).offset(16)
             $0.leading.equalToSuperview().inset(16)
         }
         
+        locationLabel.snp.makeConstraints{
+            $0.top.equalTo(locationTitleLabel.snp.bottom).offset(8)
+            $0.leading.equalToSuperview().inset(24)
+        }
+        
+        parkingLabel.snp.makeConstraints {
+            $0.top.equalTo(locationLabel.snp.bottom).offset(16)
+            $0.leading.equalToSuperview().inset(16)
+        }
         
         collectionView.snp.makeConstraints {
-            $0.top.equalTo(locationLabel.snp.bottom).offset(12)
+            $0.top.equalTo(parkingLabel.snp.bottom).offset(4)
             $0.leading.trailing.bottom.equalToSuperview()
         }
     }
@@ -196,6 +227,6 @@ extension MultiStepBottomSheet: UIGestureRecognizerDelegate {
 
 extension MultiStepBottomSheet {
     func updateCurrentAddress(with info: String) {
-        locationLabel.text = "현재장소: \(info)"
+        locationLabel.text = "\(info)"
     }
 }
