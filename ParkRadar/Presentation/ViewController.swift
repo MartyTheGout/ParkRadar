@@ -62,6 +62,9 @@ final class MapViewController: UIViewController {
         mainView.mapView.delegate = self
         mainView.mapView.showsUserLocation = true
         
+        mainView.mapView.overrideUserInterfaceStyle = .dark // 이건 UI 요소용 (효과 제한적)
+        mainView.mapView.mapType = .mutedStandard
+        
         mainView.upperTabView.noParkShowingButton.addTarget(self, action: #selector(zoomOutToSeoulWithDangerZone), for: .touchUpInside)
         mainView.upperTabView.safeParkShowingButton.addTarget(self, action: #selector(zoomOutToSeoulWithSafeZone), for: .touchUpInside)
         mainView.upperTabView.illegalExplanationButton.addTarget(self, action: #selector(goToFineDetailViewController), for: .touchUpInside)

@@ -31,7 +31,7 @@ final class MultiStepBottomSheet: UIView {
     
     let locationLabel: UILabel = {
         let label = UILabel()
-        
+        label.textColor = .white
         return label
     }()
     
@@ -90,7 +90,8 @@ final class MultiStepBottomSheet: UIView {
     }
     
     private func configureViewDetail() {
-        backgroundColor = .white.withAlphaComponent(0.7)
+//        backgroundColor = .white.withAlphaComponent(0.7)
+        backgroundColor = Color.Back.main.ui.withAlphaComponent(0.7)
         
         layer.cornerRadius = 16
         clipsToBounds = true

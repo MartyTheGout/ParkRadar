@@ -9,7 +9,8 @@ import UIKit
 
 enum Color {
     enum Back : String {
-        case main = "F8F4EC"
+//        case main = "F8F4EC"
+        case main = "3A3F4B"
         
         var ui: UIColor {
             UIColor(hex: self.rawValue)

@@ -16,21 +16,27 @@ class MainView: UIView {
     let dangerFilterButton = {
         let button = UIButton()
         button.configuration = .horizontalStyle(title: "주정차\n단속구역", imageName: "eye.fill", tintColor: .red)
-        button.backgroundColor = .white.withAlphaComponent(0.9)
+//        button.backgroundColor = .white.withAlphaComponent(0.9)
+        button.backgroundColor = Color.Back.main.ui.withAlphaComponent(0.7)
+        button.titleLabel?.textColor = .white
         return button
     }()
     
     let safeFilterButton = {
         let button = UIButton()
         button.configuration = .horizontalStyle(title: "서울시\n공영주차장", imageName: "car.2.fill", tintColor: Color.Subject.safe.ui)
-        button.backgroundColor = .white.withAlphaComponent(0.9)
+//        button.backgroundColor = .white.withAlphaComponent(0.9)
+        button.backgroundColor = Color.Back.main.ui.withAlphaComponent(0.7)
+        button.titleLabel?.textColor = .white
         return button
     }()
     
     let userLocationButton: UIButton = {
         let button = UIButton()
-        button.configuration = .iconStyle(imageName: "location.fill", tintColor: .black)
-        button.backgroundColor = .white.withAlphaComponent(0.9)
+        button.configuration = .iconStyle(imageName: "location.fill", tintColor: .white)
+//        button.backgroundColor = .white.withAlphaComponent(0.9)
+        button.backgroundColor = Color.Back.main.ui.withAlphaComponent(0.7)
+        button.titleLabel?.textColor = .white
         return button
     }()
     

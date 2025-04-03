@@ -13,7 +13,7 @@ extension UIButton.Configuration {
         config.image = UIImage(systemName: imageName)
         config.imagePlacement = .top
         config.imagePadding = 6
-        config.baseForegroundColor = .label
+        config.baseForegroundColor = .white
 
         config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
 
@@ -45,7 +45,7 @@ extension UIButton.Configuration {
         let attributedTitle = NSAttributedString(string: title, attributes: [
             .font: UIFont.systemFont(ofSize: 11, weight: .regular),
             .paragraphStyle: paragraphStyle,
-            .foregroundColor : UIColor.black
+            .foregroundColor : UIColor.white
         ])
         
         config.attributedTitle = AttributedString(attributedTitle)
