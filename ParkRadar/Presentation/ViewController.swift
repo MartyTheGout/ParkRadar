@@ -342,13 +342,12 @@ extension MapViewController: UICollectionViewDataSource, UICollectionViewDelegat
         
         let item = parkingInfo[indexPath.item]
         cell.configure(with: item)
-        return cell
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let item = parkingInfo[indexPath.item]
         
-        selectedParkingSubject.send(item)
+        cell.onTapClosure = { [weak self] in
+            self?.selectedParkingSubject.send(item)
+        }
+        
+        return cell
     }
 }
 
@@ -410,7 +409,7 @@ extension MapViewController {
         safeFilterSubject.send(newValue)
         
         var config = mainView.safeFilterButton.configuration ?? UIButton.Configuration.plain()
-            
+        
         let newImage = UIImage(systemName: "car.2.fill")
         config.image = newImage
         config.baseForegroundColor = newValue ? .green : .black

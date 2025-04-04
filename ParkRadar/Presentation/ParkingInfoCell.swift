@@ -11,6 +11,8 @@ import SnapKit
 final class ParkingInfoCell: UICollectionViewCell {
     static let reuseIdentifier = "ParkingInfoCell"
     
+    var onTapClosure: (()->Void)?
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .semibold)
@@ -55,10 +57,17 @@ final class ParkingInfoCell: UICollectionViewCell {
         contentView.layer.shadowRadius = 4
         
         setupLayout()
+        
+        setupAction()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        onTapClosure = nil
     }
     
     private func setupLayout() {
@@ -96,6 +105,14 @@ final class ParkingInfoCell: UICollectionViewCell {
             $0.leading.trailing.equalTo(titleLabel)
             $0.bottom.lessThanOrEqualToSuperview().inset(12)
         }
+    }
+    
+    private func setupAction() {
+        goToNavButton.addTarget(self, action: #selector(executeClosure) , for: .touchUpInside)
+    }
+    
+    @objc private func executeClosure() {
+        self.onTapClosure?()
     }
     
     func configure(with data : SafeParkingArea) {
