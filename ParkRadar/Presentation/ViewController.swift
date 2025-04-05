@@ -43,6 +43,7 @@ final class MapViewController: UIViewController {
         setupLocationManager()
         bindViewModel()
         setupCollectionView()
+        setupParkLocationButton()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -75,6 +76,10 @@ final class MapViewController: UIViewController {
         locationManager.requestWhenInUseAuthorization()
         locationManager.delegate = self
         locationManager.startUpdatingLocation()
+    }
+    
+    private func setupParkLocationButton() {
+        bottomView.parkSavingButton.addTarget(self, action: #selector(presentParkLocationView), for: .touchUpInside)
     }
     
     private func bindViewModel() {
@@ -448,5 +453,17 @@ extension MapViewController {
         safeFilterSubject.send(true)
         dangerFilterSubject.send(true)
         mainView.mapView.setCamera(camera, animated: true)
+    }
+    
+    @objc private func presentParkLocationView() {
+        let viewModel = LocationPhotoViewModel(
+            location: currentLocationSubject.value,
+            address: bottomView.locationLabel.text ?? ""
+        )
+        let destination = ParkLocationViewController(viewModel: viewModel)
+        
+        destination.modalPresentationStyle = .custom
+        
+        present(destination, animated: true)
     }
 }

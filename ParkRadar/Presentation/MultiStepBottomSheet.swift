@@ -46,6 +46,13 @@ final class MultiStepBottomSheet: UIView {
         return label
     }()
     
+    let parkSavingButton: UIButton = {
+        let button = UIButton()
+        button.configuration = .horizontalStyle(title: "주차 위치 저장", imageName: "pin.fill", tintColor: .orange)
+        button.backgroundColor = .white.withAlphaComponent(0.9)
+        return button
+    }()
+    
     let parkingLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 15, weight: .bold)
@@ -82,6 +89,7 @@ final class MultiStepBottomSheet: UIView {
         addSubview(grabber)
         addSubview(locationTitleLabel)
         addSubview(locationLabel)
+        addSubview(parkSavingButton)
         addSubview(parkingLabel)
         addSubview(collectionView)
     }
@@ -107,6 +115,11 @@ final class MultiStepBottomSheet: UIView {
         locationLabel.snp.makeConstraints{
             $0.top.equalTo(locationTitleLabel.snp.bottom).offset(8)
             $0.leading.equalToSuperview().inset(24)
+        }
+        
+        parkSavingButton.snp.makeConstraints {
+            $0.top.equalTo(locationTitleLabel.snp.top).offset(8)
+            $0.trailing.equalToSuperview().inset(16)
         }
         
         parkingLabel.snp.makeConstraints {
@@ -185,6 +198,20 @@ final class MultiStepBottomSheet: UIView {
         default: break
         }
     }
+    
+    override func draw(_ rect: CGRect) {
+        parkSavingButton.layer.cornerRadius = parkSavingButton.frame.height / 2
+        parkSavingButton.layer.masksToBounds = false
+        parkSavingButton.layer.shadowColor = UIColor.black.cgColor
+        parkSavingButton.layer.shadowOffset = .init(width: 0, height: 3)
+        parkSavingButton.layer.shadowRadius = 3
+        parkSavingButton.layer.shadowOpacity = 0.3
+        parkSavingButton.layer.shadowPath = UIBezierPath(
+            roundedRect: parkSavingButton.bounds,
+            cornerRadius: parkSavingButton.layer.cornerRadius
+        ).cgPath
+        
+    }
 }
 
 extension MultiStepBottomSheet {
@@ -214,14 +241,14 @@ extension MultiStepBottomSheet: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true // ***collectionView scroll과 공존 가능하도록
     }
-
+    
     override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard let gestureView = gestureRecognizer.view else { return false }
-
-         let location = gestureRecognizer.location(in: self)
-         let isInsideCollectionView = collectionView.frame.contains(location)
-
-         return !isInsideCollectionView // **collectionView 바깥에서 시작했을 때만 시트 드래그 허용
+        
+        let location = gestureRecognizer.location(in: self)
+        let isInsideCollectionView = collectionView.frame.contains(location)
+        
+        return !isInsideCollectionView // **collectionView 바깥에서 시작했을 때만 시트 드래그 허용
     }
 }
 
