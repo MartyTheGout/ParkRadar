@@ -10,9 +10,17 @@ import Combine
 import MapKit
 
 class ParkLocationViewController: UIViewController, UINavigationControllerDelegate {
-
+    
     private let mainView = ParkLocationView()
     private let viewModel: LocationPhotoViewModel
+    
+    // Better Perceived Performance, when initilaize this, at the same time when parent component initialized.
+    private let imagePickerController: UIImagePickerController = {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        return picker
+    }()
+    
     private var cancellables = Set<AnyCancellable>()
     
     init(viewModel: LocationPhotoViewModel) {
@@ -66,9 +74,6 @@ class ParkLocationViewController: UIViewController, UINavigationControllerDelega
     
     // MARK: - Actions
     @objc private func photoButtonTapped() {
-        // Present image picker
-        let imagePickerController = UIImagePickerController()
-        imagePickerController.sourceType = .camera
         imagePickerController.delegate = self
         present(imagePickerController, animated: true)
     }
@@ -92,10 +97,8 @@ extension ParkLocationViewController: UIImagePickerControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let image = info[.originalImage] as? UIImage {
             viewModel.setImage(image)
-            // Update the UI to show the selected image
             mainView.photoButton.setImage(image, for: .normal)
             mainView.photoButton.contentMode = .scaleAspectFill
-            mainView.photoButton.clipsToBounds = true
         }
         picker.dismiss(animated: true)
     }
