@@ -11,10 +11,12 @@ import Combine
 
 class LocationPhotoViewModel: NSObject {
     // MARK: - Properties
+    private let repository = Repository()
+    
     private let locationManager = CLLocationManager()
+    
     private var locationSubject = CurrentValueSubject<CLLocation?, Never>(nil)
     private var imageSubject = CurrentValueSubject<UIImage?, Never>(nil)
-    
     private var addressSubject = CurrentValueSubject<String, Never>("")
     
     var currentLocation: AnyPublisher<CLLocation?, Never> {
@@ -31,15 +33,7 @@ class LocationPhotoViewModel: NSObject {
         
         locationSubject.send(location)
         addressSubject.send(address)
-//        setupLocationManager()
     }
-    
-//    private func setupLocationManager() {
-//        locationManager.delegate = self
-//        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-//        locationManager.requestWhenInUseAuthorization()
-//        locationManager.startUpdatingLocation()
-//    }
     
     // MARK: - Public Methods
     func setImage(_ image: UIImage) {
@@ -51,32 +45,55 @@ class LocationPhotoViewModel: NSObject {
             print("Location or image is missing")
             return
         }
+        guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
         
-        // Here you would implement your Realm saving logic
-        // For example:
-        // let locationRecord = LocationRecord()
-        // locationRecord.latitude = location.coordinate.latitude
-        // locationRecord.longitude = location.coordinate.longitude
-        // locationRecord.memo = memo
-        // locationRecord.imageData = image.jpegData(compressionQuality: 0.7)
-        // try? realm.write {
-        //     realm.add(locationRecord)
-        // }
-    
+        let fileName = "parkedInfo"
+        
+        let fileURL = documentDirectory.appendingPathComponent("\(fileName).jpg")
+        removeImageFromDocument(filename: fileName)
+        
+        guard let data = image.jpegData(compressionQuality: 0.5) else { return }
+        
+        do {
+            try data.write(to: fileURL)
+        } catch {
+            print("이미지 저장 실패")
+        }
+        
+        let parkedLocation = ParkedLocation(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, imagePath: fileURL.path())
+        
+        repository.saveParkedLocation(parkedLocation)
     }
 }
-//
-//// MARK: - CLLocationManagerDelegate
-//extension LocationPhotoViewModel: CLLocationManagerDelegate {
-//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-//        if let location = locations.last {
-//            locationSubject.send(location)
-//            // We only need one location update for this use case
-//            locationManager.stopUpdatingLocation()
-//        }
-//    }
-//    
-//    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-//        print("Location manager failed with error: \(error.localizedDescription)")
-//    }
-//}
+
+extension LocationPhotoViewModel {
+    func loadImageFromDocument(filename: String) -> UIImage? {
+        guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return nil }
+        
+        let fileURL = documentDirectory.appendingPathComponent("\(filename).jpg")
+        
+        if FileManager.default.fileExists(atPath: fileURL.path()) {
+            return UIImage(contentsOfFile: fileURL.path())
+        } else {
+            return UIImage(systemName: "star")
+        }
+    }
+    
+    func removeImageFromDocument(filename: String) {
+        guard let documentDirectory = FileManager.default.urls(
+            for: .documentDirectory,
+            in: .userDomainMask).first else { return }
+        
+        let fileURL = documentDirectory.appendingPathComponent("\(filename).jpg")
+        
+        if FileManager.default.fileExists(atPath: fileURL.path()) {
+            do {
+                try FileManager.default.removeItem(atPath: fileURL.path())
+            } catch {
+                print("file remove error", error)
+            }
+        } else {
+            print("file no exist")
+        }
+    }
+}
