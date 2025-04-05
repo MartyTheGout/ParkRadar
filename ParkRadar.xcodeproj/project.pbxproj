@@ -201,6 +201,7 @@
 				INFOPLIST_FILE = ParkRadar/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Park Radar";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_NSCameraUsageDescription = "(Required) The camera feature is necessary for providing image information of where users pared thier car at ";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "(Required) The location feature is necessary for providing parking-inhibitory area, available parking space information based on user's location ";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -239,6 +240,7 @@
 				INFOPLIST_FILE = ParkRadar/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Park Radar";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_NSCameraUsageDescription = "(Required) The camera feature is necessary for providing image information of where users pared thier car at ";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "(Required) The location feature is necessary for providing parking-inhibitory area, available parking space information based on user's location ";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;

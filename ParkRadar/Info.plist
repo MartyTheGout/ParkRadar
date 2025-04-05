@@ -4,14 +4,14 @@
 <dict>
 	<key>APP_KEY</key>
 	<string>$(APP_KEY)</string>
-	<key>REST_API_KEY</key>
-	<string>$(REST_API_KEY)</string>
 	<key>LOCATION_BASE_URL</key>
 	<string>$(LOCATION_BASE_URL)</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>kakaonavi-sdk</string>
 	</array>
+	<key>REST_API_KEY</key>
+	<string>$(REST_API_KEY)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
