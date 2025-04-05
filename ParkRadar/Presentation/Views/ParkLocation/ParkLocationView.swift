@@ -117,7 +117,10 @@ class ParkLocationView : UIView {
             .font : UIFont.systemFont(ofSize: 15, weight: .bold),
         ])
         
-        photoButton.setImage(UIImage(systemName: "camera"), for: .normal)
+        
+        let config = UIImage.SymbolConfiguration(pointSize: 30, weight: .medium)
+        let image = UIImage(systemName: "camera.circle.fill", withConfiguration: config)
+        photoButton.setImage(image, for: .normal)
         photoButton.backgroundColor = .white
         photoButton.layer.cornerRadius = 30
         
@@ -154,6 +157,10 @@ class ParkLocationView : UIView {
             roundedRect: photoButton.bounds,
             cornerRadius: photoButton.layer.cornerRadius
         ).cgPath
+        
+        photoButton.imageView?.contentMode = .scaleAspectFill
+        photoButton.imageView?.clipsToBounds = true
+        photoButton.imageView?.layer.cornerRadius = photoButton.layer.cornerRadius
     }
     
     func fillUpText(with data: String) {
