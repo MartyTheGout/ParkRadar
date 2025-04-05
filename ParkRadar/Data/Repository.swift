@@ -12,6 +12,7 @@ import CoreLocation
 protocol RepositoryProtocol {
     func getSafeArea(latitude : Double, longitude: Double, altitude: CLLocationDistance) -> Results<SafeParkingArea>
     func getDangerArea(latitude : Double, longitude: Double, altitude: CLLocationDistance) -> Results<NoParkingArea>
+    func getParkedLocation() -> Results<ParkedLocation>
 }
 
 final class Repository: RepositoryProtocol {
@@ -97,6 +98,16 @@ final class Repository: RepositoryProtocol {
     
     func getDangerAreaCluster() -> Results<NoParkingArea> {
         self.realm.objects(NoParkingArea.self)
+    }
+    
+    func getParkedLocation() -> Results<ParkedLocation> {
+        self.realm.objects(ParkedLocation.self)
+    }
+    
+    func saveParkedLocation(_ location: ParkedLocation) {
+        try! self.realm.write {
+            self.realm.add(location, update: .modified)
+        }
     }
 }
 
