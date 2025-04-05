@@ -60,10 +60,10 @@ final class MapViewModel {
             .flatMap { location in
                 self.geocodingService.reverseGeocode(location: location)
             }
-            .sink { address in
+            .sink { [weak self]address in
                 if let address {
-                    print("address reverse geocoding called")
-                    addressPub.send(address)
+                    let filtered = self?.checkDuplicateText(address)
+                    addressPub.send(filtered!)
                 }
             }
             .store(in: &cancellables)
@@ -229,6 +229,23 @@ final class MapViewModel {
             safeFilterCondition: safeFilterPub.eraseToAnyPublisher(),
             dangerFilterCondition: dangerFilterPub.eraseToAnyPublisher()
         )
+    }
+}
+
+extension MapViewModel {
+    private func checkDuplicateText(_ address: String) -> String {
+        if address == "" {
+            return ""
+        }
+        
+        var arr = address.split(separator: " ")
+        
+        if arr[0] == arr[1] { // eliminate the duplicated "서울특별시" text in the address
+            arr.removeFirst()
+            return arr.joined(separator: " ")
+        }
+        
+        return arr.joined(separator: " ")
     }
 }
 
