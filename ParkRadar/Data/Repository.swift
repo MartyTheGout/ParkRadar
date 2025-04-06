@@ -109,6 +109,14 @@ final class Repository: RepositoryProtocol {
             self.realm.add(location, update: .modified)
         }
     }
+    
+    func deleteParkedLocation() {
+        let record = getParkedLocation()
+        
+        try! self.realm.write {
+            self.realm.delete(record)
+        }
+    }
 }
 
 extension Repository {
