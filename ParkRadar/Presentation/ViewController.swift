@@ -32,6 +32,8 @@ final class MapViewController: UIViewController {
     
     private var parkingInfo:[SafeParkingArea] = []
     
+    private var parkedLocation: ParkedLocation?
+    
     override func loadView() {
         self.view = mainView
     }
@@ -79,7 +81,7 @@ final class MapViewController: UIViewController {
     }
     
     private func setupParkLocationButton() {
-        bottomView.parkSavingButton.addTarget(self, action: #selector(presentParkLocationView), for: .touchUpInside)
+        bottomView.parkSavingButton.addTarget(self, action: #selector(navigateParkLocationViewWithButton), for: .touchUpInside)
     }
     
     private func bindViewModel() {
@@ -136,6 +138,22 @@ final class MapViewController: UIViewController {
                 
             }.store(in: &cancellables)
         
+        output.parkedLocation
+            .receive(on: RunLoop.main)
+            .sink { [weak self] parkedInfo in
+                guard let parkedInfo else {
+                    self?.handlePakredInfoInteraction(hasInfo: false)
+                    self?.updateAnnotations(ofType: ParkInfoAnnotation.self, with: [])
+                    return
+                }
+                
+                self?.handlePakredInfoInteraction(hasInfo: true)
+                
+                self?.parkedLocation = parkedInfo
+    
+                self?.updateAnnotations(ofType: ParkInfoAnnotation.self, with: [ParkInfoAnnotation(from: parkedInfo)])
+                
+            }.store(in: &cancellables)
     }
     
     private func updateAnnotations<T: MKAnnotation>(ofType type: T.Type, with newAnnotations: [T]) {
@@ -274,6 +292,23 @@ extension MapViewController: MKMapViewDelegate {
             return view
         }
         
+        if let parkedInfo = annotation as? ParkInfoAnnotation {
+            let identifier = "ParkInfoAnnotation"
+            let view = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
+            ?? MKMarkerAnnotationView(annotation: parkedInfo, reuseIdentifier: identifier)
+            
+            view.canShowCallout = true
+            view.markerTintColor = .systemOrange
+            
+            if let symbolImage = UIImage(systemName: parkedInfo.symbolName) {
+                view.glyphImage = symbolImage
+            } else {
+                view.glyphText = "!"
+            }
+            
+            return view
+        }
+        
         return nil
     }
     
@@ -282,6 +317,14 @@ extension MapViewController: MKMapViewDelegate {
         guard let circle = overlay as? MKCircle else {
             return MKOverlayRenderer(overlay: overlay)
         }
+        
+        let isParking = mapView.annotations.contains(where: { annotation in
+            if let parking = annotation as? ParkInfoAnnotation {
+                return parking.coordinate.latitude == circle.coordinate.latitude &&
+                parking.coordinate.longitude == circle.coordinate.longitude
+            }
+            return false
+        })
         
         let isDanger = mapView.annotations.contains(where: { annotation in
             if let danger = annotation as? DangerAnnotation {
@@ -302,7 +345,10 @@ extension MapViewController: MKMapViewDelegate {
         let renderer = MKCircleRenderer(circle: circle)
         renderer.lineWidth = 1
         
-        if isDanger {
+        if isParking {
+            renderer.fillColor = UIColor.systemOrange.withAlphaComponent(0.1)
+            renderer.strokeColor = UIColor.systemOrange.withAlphaComponent(0.4)
+        } else if isDanger {
             renderer.fillColor = UIColor.systemRed.withAlphaComponent(0.1)
             renderer.strokeColor = UIColor.systemRed.withAlphaComponent(0.4)
         } else {
@@ -311,6 +357,22 @@ extension MapViewController: MKMapViewDelegate {
         }
         
         return renderer
+    }
+    
+    //MARK: - Annotation Selection Handler
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        guard let parking = view.annotation as? ParkInfoAnnotation else { return }
+        
+        let selectedAnnotation = parking
+        let currentMapView = mapView
+        
+        presentParkLocationView(parkedLocation: parkedLocation) { [weak currentMapView, weak selectedAnnotation] in
+            // dismiss 후 실행될 completion handler
+            // selectedAnnotation이 여전히 있다면 선택 해제
+            if let mapView = currentMapView, let annotation = selectedAnnotation {
+                mapView.deselectAnnotation(annotation, animated: true)
+            }
+        }
     }
     
     func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
@@ -455,15 +517,47 @@ extension MapViewController {
         mainView.mapView.setCamera(camera, animated: true)
     }
     
-    @objc private func presentParkLocationView() {
-        let viewModel = LocationPhotoViewModel(
-            location: currentLocationSubject.value,
-            address: bottomView.locationLabel.text ?? ""
-        )
+    @objc private func navigateParkLocationViewWithButton() {
+        presentParkLocationView()
+    }
+    
+    private func presentParkLocationView(parkedLocation: ParkedLocation? = nil, completion: (() -> Void)? = nil) {
+        
+        var viewModel : ParkLocationViewModel
+        
+        if let parkedLocation {
+            let presentable = ParkedLocationPresentable(
+                latitude: parkedLocation.latitude, longitude: parkedLocation.longitude, title: parkedLocation.title, imagePath: parkedLocation.imagePath
+            )
+            
+            viewModel = ParkLocationViewModel(parkedLocation: presentable)
+        } else {
+            let location = currentLocationSubject.value
+            let latitude = location.coordinate.latitude
+            let longitude = location.coordinate.longitude
+            let address = bottomView.locationLabel.text ?? ""
+            
+            viewModel = ParkLocationViewModel(
+                parkedLocation: ParkedLocationPresentable(
+                    latitude: latitude,
+                    longitude: longitude,
+                    title: address,
+                    imagePath: nil
+                )
+            )
+        }
+        
         let destination = ParkLocationViewController(viewModel: viewModel)
         
         destination.modalPresentationStyle = .custom
         
+        destination.dismissCompletion = completion
+        
         present(destination, animated: true)
+    }
+    
+    private func handlePakredInfoInteraction(hasInfo: Bool) {
+        mainView.makeAvailableParkedInfoButton(with: hasInfo)
+        bottomView.makeAvailableParkedInfoButton(with: hasInfo)
     }
 }

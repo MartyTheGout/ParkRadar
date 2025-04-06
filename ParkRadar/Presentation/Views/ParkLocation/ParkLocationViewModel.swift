@@ -9,31 +9,61 @@ import Foundation
 import MapKit
 import Combine
 
-class LocationPhotoViewModel: NSObject {
+struct ParkedLocationPresentable {
+    var latitude: Double
+    var longitude: Double
+    var title: String
+    var imagePath: String?
+}
+
+class ParkLocationViewModel: NSObject {
     // MARK: - Properties
     private let repository = Repository()
+    private let imageHandler = ImageHandler()
     
     private let locationManager = CLLocationManager()
     
     private var locationSubject = CurrentValueSubject<CLLocation?, Never>(nil)
     private var imageSubject = CurrentValueSubject<UIImage?, Never>(nil)
     private var addressSubject = CurrentValueSubject<String, Never>("")
-    
-    var currentLocation: AnyPublisher<CLLocation?, Never> {
-        return locationSubject.eraseToAnyPublisher()
-    }
-    
-    var address: AnyPublisher<String, Never> {
-        return addressSubject.eraseToAnyPublisher()
-    }
+
+    var forSave = true
     
     // MARK: - Initialization
-    init(location : CLLocation, address: String) {
+    init(parkedLocation: ParkedLocationPresentable) {
         super.init()
         
+        let location = CLLocation(
+            latitude: parkedLocation.latitude,
+            longitude: parkedLocation.longitude
+        )
+        
+        if let imagePath = parkedLocation.imagePath {
+            let image = imageHandler.loadImageFromDocument(filename: imagePath)
+            imageSubject.send(image)
+            forSave = false
+        }
+         
         locationSubject.send(location)
-        addressSubject.send(address)
+        addressSubject.send(parkedLocation.title)
     }
+    
+    struct Input {}
+    
+    struct Output {
+        var locationSeq : AnyPublisher<CLLocation?, Never>
+        var imageSeq : AnyPublisher<UIImage?, Never>
+        var addressSeq : AnyPublisher<String, Never>
+    }
+    
+    func bind(_ input: Input) -> Output {
+        return Output(
+            locationSeq: locationSubject.eraseToAnyPublisher(),
+            imageSeq: imageSubject.eraseToAnyPublisher(),
+            addressSeq: addressSubject.eraseToAnyPublisher()
+        )
+    }
+    
     
     // MARK: - Public Methods
     func setImage(_ image: UIImage) {
@@ -41,59 +71,27 @@ class LocationPhotoViewModel: NSObject {
     }
     
     func saveLocation() {
-        guard let location = locationSubject.value, let image = imageSubject.value else {
-            print("Location or image is missing")
+        guard let location = locationSubject.value else {
+            print("Location is missing")
             return
         }
-        guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
-        
         let fileName = "parkedInfo"
         
-        let fileURL = documentDirectory.appendingPathComponent("\(fileName).jpg")
-        removeImageFromDocument(filename: fileName)
-        
-        guard let data = image.jpegData(compressionQuality: 0.5) else { return }
-        
-        do {
-            try data.write(to: fileURL)
-        } catch {
-            print("이미지 저장 실패")
+        if let image = imageSubject.value {
+            imageHandler.saveImageToDocument(image: image, fileName: fileName)
         }
         
-        let parkedLocation = ParkedLocation(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, imagePath: fileURL.path())
+        let parkedLocation = ParkedLocation(
+            latitude: location.coordinate.latitude,
+            longitude: location.coordinate.longitude,
+            title: addressSubject.value,
+            imagePath: fileName
+        )
         
         repository.saveParkedLocation(parkedLocation)
     }
-}
-
-extension LocationPhotoViewModel {
-    func loadImageFromDocument(filename: String) -> UIImage? {
-        guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return nil }
-        
-        let fileURL = documentDirectory.appendingPathComponent("\(filename).jpg")
-        
-        if FileManager.default.fileExists(atPath: fileURL.path()) {
-            return UIImage(contentsOfFile: fileURL.path())
-        } else {
-            return UIImage(systemName: "star")
-        }
-    }
     
-    func removeImageFromDocument(filename: String) {
-        guard let documentDirectory = FileManager.default.urls(
-            for: .documentDirectory,
-            in: .userDomainMask).first else { return }
-        
-        let fileURL = documentDirectory.appendingPathComponent("\(filename).jpg")
-        
-        if FileManager.default.fileExists(atPath: fileURL.path()) {
-            do {
-                try FileManager.default.removeItem(atPath: fileURL.path())
-            } catch {
-                print("file remove error", error)
-            }
-        } else {
-            print("file no exist")
-        }
+    func deleteLocation() {
+        repository.deleteParkedLocation()
     }
 }

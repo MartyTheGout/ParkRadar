@@ -29,7 +29,6 @@ final class MultiStepBottomSheet: UIView {
         return view
     }()
     
-    
     let locationTitleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 15, weight: .bold)
@@ -210,7 +209,6 @@ final class MultiStepBottomSheet: UIView {
             roundedRect: parkSavingButton.bounds,
             cornerRadius: parkSavingButton.layer.cornerRadius
         ).cgPath
-        
     }
 }
 
@@ -243,7 +241,7 @@ extension MultiStepBottomSheet: UIGestureRecognizerDelegate {
     }
     
     override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        guard let gestureView = gestureRecognizer.view else { return false }
+        guard let _ = gestureRecognizer.view else { return false }
         
         let location = gestureRecognizer.location(in: self)
         let isInsideCollectionView = collectionView.frame.contains(location)
@@ -255,5 +253,11 @@ extension MultiStepBottomSheet: UIGestureRecognizerDelegate {
 extension MultiStepBottomSheet {
     func updateCurrentAddress(with info: String) {
         locationLabel.text = "\(info)"
+    }
+    
+    func makeAvailableParkedInfoButton(with isValid: Bool) {
+        // if isValid == hasInfo => need to be hidden
+        parkSavingButton.isHidden = isValid
+        parkSavingButton.isUserInteractionEnabled = !isValid
     }
 }

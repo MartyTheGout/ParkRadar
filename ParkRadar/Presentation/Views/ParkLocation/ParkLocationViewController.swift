@@ -11,11 +11,15 @@ import MapKit
 
 class ParkLocationViewController: UIViewController, UINavigationControllerDelegate {
     
+    private let viewModel: ParkLocationViewModel
+    
     private let mainView = ParkLocationView()
-    private let viewModel: LocationPhotoViewModel
+    private let imageHandler = ImageHandler()
+    
+    var dismissCompletion: (() -> Void)?
     
     // Better Perceived Performance, when initilaize this, at the same time when parent component initialized.
-    private let imagePickerController: UIImagePickerController = {
+    private lazy var imagePickerController: UIImagePickerController = {
         let picker = UIImagePickerController()
         picker.sourceType = .camera
         return picker
@@ -23,8 +27,9 @@ class ParkLocationViewController: UIViewController, UINavigationControllerDelega
     
     private var cancellables = Set<AnyCancellable>()
     
-    init(viewModel: LocationPhotoViewModel) {
+    init(viewModel: ParkLocationViewModel) {
         self.viewModel = viewModel
+        
         super.init(nibName: nil, bundle: nil)
         self.modalPresentationStyle = .custom
         self.transitioningDelegate = self
@@ -40,11 +45,17 @@ class ParkLocationViewController: UIViewController, UINavigationControllerDelega
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setSubComponent()
         bindViewModel()
+        
+        imagePickerController.delegate = self
     }
     
     private func bindViewModel() {
-        viewModel.currentLocation
+        let input = ParkLocationViewModel.Input()
+        let output = viewModel.bind(input)
+        
+        output.locationSeq
             .receive(on: DispatchQueue.main)
             .sink { [weak self] location in
                 guard let self = self, let location = location else { return }
@@ -60,21 +71,40 @@ class ParkLocationViewController: UIViewController, UINavigationControllerDelega
             }
             .store(in: &cancellables)
         
-        viewModel.address
+        output.addressSeq
             .receive(on: DispatchQueue.main)
             .sink { [weak self] address in
                 self?.setCurrentAddress(with: address)
             }
             .store(in: &cancellables)
         
-        mainView.photoButton.addTarget(self, action: #selector(photoButtonTapped), for: .touchUpInside)
-        mainView.saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+        output.imageSeq
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] image in
+                if let image {
+                    self?.mainView.photoButton.setImage(image, for: .normal)
+                    self?.mainView.photoButton.contentMode = .scaleAspectFill
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func setSubComponent() {
         mainView.cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
+        
+        if !viewModel.forSave {
+            mainView.photoButton.isUserInteractionEnabled = false
+            
+            mainView.changeSaveButtonText(with: "삭제하기")
+            mainView.saveButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
+        } else {
+            mainView.saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+            mainView.photoButton.addTarget(self, action: #selector(photoButtonTapped), for: .touchUpInside)
+        }
     }
     
     // MARK: - Actions
     @objc private func photoButtonTapped() {
-        imagePickerController.delegate = self
         present(imagePickerController, animated: true)
     }
     
@@ -87,9 +117,21 @@ class ParkLocationViewController: UIViewController, UINavigationControllerDelega
         dismiss(animated: true)
     }
     
+    @objc private func deleteButtonTapped() {
+        viewModel.deleteLocation()
+        dismiss(animated: true)
+    }
+    
     private func setCurrentAddress(with address: String) {
         mainView.fillUpText(with: address)
     }
+    
+    override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
+         super.dismiss(animated: flag) {
+             completion?()
+             self.dismissCompletion?()
+         }
+     }
 }
 
 // MARK: - UIImagePickerControllerDelegate

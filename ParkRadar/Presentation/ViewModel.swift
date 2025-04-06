@@ -10,6 +10,8 @@ final class MapViewModel {
     
     let repository = Repository()
     
+    var notificationToken : NotificationToken?
+    
     struct Input {
         let currentCenter: AnyPublisher<CLLocationCoordinate2D, Never>
         let currentAltitude: AnyPublisher<CLLocationDistance, Never>
@@ -31,6 +33,8 @@ final class MapViewModel {
         
         let safeFilterCondition: AnyPublisher<Bool, Never>
         let dangerFilterCondition: AnyPublisher<Bool, Never>
+        
+        let parkedLocation: AnyPublisher<ParkedLocation?, Never>
     }
     
     let latestLocationAndZoom = CurrentValueSubject<(CLLocationCoordinate2D, CLLocationDistance), Never>((.init(), 0))
@@ -54,7 +58,11 @@ final class MapViewModel {
         let safeFilterPub = CurrentValueSubject<Bool, Never>(true)
         let dangerFilterPub = CurrentValueSubject<Bool, Never>(true)
         
-        repository.showFilePath() //for debugging
+        let parkedInfoPub = CurrentValueSubject<ParkedLocation?, Never>(nil)
+        
+        makeRealmDataSeq(in: parkedInfoPub)
+        
+        //        repository.showFilePath() //for debugging
         
         input.currentLocation
             .flatMap { location in
@@ -100,7 +108,6 @@ final class MapViewModel {
                 
                 let (center, altitude) = self.latestLocationAndZoom.value
                 
-                
                 let dangerObjects = repository.getDangerArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
                 let dangerAnnotations: [DangerAnnotation] = dangerObjects.compactMap { DangerAnnotation(from: $0) }
                 dangerPub.send(filter ? dangerAnnotations : [])
@@ -124,8 +131,6 @@ final class MapViewModel {
                     let safeAnnotations: [SafeAnnotation] = safeObjects.compactMap { SafeAnnotation(from: $0) }
                     let dangerAnnotations: [DangerAnnotation] = dangerObjects.compactMap { DangerAnnotation(from: $0) }
                     
-                    
-                    
                     let sortedNearbyObjects = repository.getClosestParkingAreas(latitude: center.latitude, longitude: center.longitude)
                     
                     safePub.send(safeFilterPub.value ? safeAnnotations : [])
@@ -133,14 +138,11 @@ final class MapViewModel {
                     
                     parkingPub.send(sortedNearbyObjects)
                     
-                    //                print("중심 위치: \(center.latitude), \(center.longitude)")
-                    //                print("찾은 주차장 개수: \(safeObjects.count)")
-                    //                print("찾은 금지구역 개수: \(dangerObjects.count)")
                 } else {
                     safePub.send([])
                     dangerPub.send([])
                     
-                    let precision = 5 // altitude에 따라 동적으로 조절 가능
+                    let precision = 5 // available to control value based on altitude
                     let safeAll = repository.getSafeAreaCluster()
                     let dangeAll = repository.getDangerAreaCluster()
                     
@@ -181,13 +183,10 @@ final class MapViewModel {
                                 count: group.count,
                                 geohash: String(hash)
                             )
-                            
                             return ClusterAnnotation(identifier: "dangerCluster", coordinate: summary.coordinate, count: summary.count)
                         }
-                        
                         output.append(contentsOf: summaries)
                     }
-                    
                     clusterPub.send(output)
                 }
             }
@@ -196,7 +195,7 @@ final class MapViewModel {
         input.selectedParking
             .filter { $0.latitude != nil && $0.longitude != nil }
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
-            .flatMap { [weak self] info in
+            .flatMap { info in
                 NetworkManager.shared.callRequest(KakaoRouter.transcoord(lat: info.latitude!, lot: info.longitude!), decodeType: CoordConvertResponse.self)
                     .tryMap { response in
                         guard let result = response.documents.first else {
@@ -227,7 +226,8 @@ final class MapViewModel {
             parkingInformation: parkingPub.eraseToAnyPublisher(),
             convertedLocation: convertedAddressPub.eraseToAnyPublisher(),
             safeFilterCondition: safeFilterPub.eraseToAnyPublisher(),
-            dangerFilterCondition: dangerFilterPub.eraseToAnyPublisher()
+            dangerFilterCondition: dangerFilterPub.eraseToAnyPublisher(),
+            parkedLocation: parkedInfoPub.eraseToAnyPublisher()
         )
     }
 }
@@ -246,6 +246,30 @@ extension MapViewModel {
         }
         
         return arr.joined(separator: " ")
+    }
+}
+
+extension MapViewModel {
+    private func makeRealmDataSeq(in subject: CurrentValueSubject<ParkedLocation?, Never>) {
+        
+        let parkedLocationRecords = repository.getParkedLocation()
+        
+        notificationToken = parkedLocationRecords.observe { changes in
+            switch changes {
+            case .initial(let results) :
+                print(" Initial — count: \(results.count)")
+                subject.send(results.first)
+            case .update(let results, let deletions, let insertions, let modifications) :
+                print(" Update — D:\(deletions), I:\(insertions), M:\(modifications), count: \(results.count)")
+                if results.isEmpty {
+                    subject.send(nil)
+                } else {
+                    subject.send(results.first)
+                }
+            case .error(let error) :
+                print("[Error]repository observer failed", error)
+            }
+        }
     }
 }
 

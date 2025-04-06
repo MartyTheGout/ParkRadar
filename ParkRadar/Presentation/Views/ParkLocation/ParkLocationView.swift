@@ -169,4 +169,11 @@ class ParkLocationView : UIView {
             .foregroundColor : UIColor.darkGray
         ])
     }
+    
+    func changeSaveButtonText(with value: String) {
+        saveButton.setAttributedTitle(NSAttributedString(string: value, attributes: [
+            .font : UIFont.systemFont(ofSize: 15),
+            .foregroundColor : UIColor.systemBlue
+        ]), for: .normal)
+    }
 }
