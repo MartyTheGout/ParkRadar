@@ -20,9 +20,6 @@ enum AuthorizationManager: String {
     
     var url: String? {
         let url = Bundle.main.infoDictionary?["LOCATION_BASE_URL"] as? String
-        
-        print(url)
-        
         return url
     }
 }
