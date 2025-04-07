@@ -32,6 +32,8 @@ final class MapViewController: UIViewController {
     
     private var parkingInfo:[SafeParkingArea] = []
     
+    private var parkedLocation: ParkedLocation?
+    
     override func loadView() {
         self.view = mainView
     }
@@ -43,6 +45,7 @@ final class MapViewController: UIViewController {
         setupLocationManager()
         bindViewModel()
         setupCollectionView()
+        setupParkLocationButton()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -69,12 +72,17 @@ final class MapViewController: UIViewController {
         mainView.dangerFilterButton.addTarget(self, action: #selector(toggleDangerFilter), for: .touchUpInside)
         mainView.safeFilterButton.addTarget(self, action: #selector(toggleSafeFilter), for: .touchUpInside)
         mainView.userLocationButton.addTarget(self, action: #selector(moveMapViewToCurrentLocation), for: .touchUpInside)
+        mainView.parkedLocationButton.addTarget(self, action: #selector(moveMapViewToCurrentLocation), for: .touchUpInside)
     }
     
     private func setupLocationManager() {
         locationManager.requestWhenInUseAuthorization()
         locationManager.delegate = self
         locationManager.startUpdatingLocation()
+    }
+    
+    private func setupParkLocationButton() {
+        bottomView.parkSavingButton.addTarget(self, action: #selector(navigateParkLocationViewWithButton), for: .touchUpInside)
     }
     
     private func bindViewModel() {
@@ -131,6 +139,30 @@ final class MapViewController: UIViewController {
                 
             }.store(in: &cancellables)
         
+        output.parkedLocation
+            .receive(on: RunLoop.main)
+            .sink { [weak self] parkedInfo in
+                guard let parkedInfo else {
+                    self?.handlePakredInfoInteraction(hasInfo: false)
+                    self?.updateAnnotations(ofType: ParkInfoAnnotation.self, with: [])
+                    return
+                }
+                
+                self?.handlePakredInfoInteraction(hasInfo: true)
+                
+                self?.parkedLocation = parkedInfo
+    
+                self?.updateAnnotations(ofType: ParkInfoAnnotation.self, with: [ParkInfoAnnotation(from: parkedInfo)])
+                
+            }.store(in: &cancellables)
+        
+        output.isDangerInformation
+            .receive(on: RunLoop.main)
+            .sink { [weak self] isDanger in
+                print(isDanger)
+                self?.handlerisDangerInfo(with: isDanger)
+                
+            }.store(in: &cancellables)
     }
     
     private func updateAnnotations<T: MKAnnotation>(ofType type: T.Type, with newAnnotations: [T]) {
@@ -269,6 +301,23 @@ extension MapViewController: MKMapViewDelegate {
             return view
         }
         
+        if let parkedInfo = annotation as? ParkInfoAnnotation {
+            let identifier = "ParkInfoAnnotation"
+            let view = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
+            ?? MKMarkerAnnotationView(annotation: parkedInfo, reuseIdentifier: identifier)
+            
+            view.canShowCallout = true
+            view.markerTintColor = .systemOrange
+            
+            if let symbolImage = UIImage(systemName: parkedInfo.symbolName) {
+                view.glyphImage = symbolImage
+            } else {
+                view.glyphText = "!"
+            }
+            
+            return view
+        }
+        
         return nil
     }
     
@@ -277,6 +326,14 @@ extension MapViewController: MKMapViewDelegate {
         guard let circle = overlay as? MKCircle else {
             return MKOverlayRenderer(overlay: overlay)
         }
+        
+        let isParking = mapView.annotations.contains(where: { annotation in
+            if let parking = annotation as? ParkInfoAnnotation {
+                return parking.coordinate.latitude == circle.coordinate.latitude &&
+                parking.coordinate.longitude == circle.coordinate.longitude
+            }
+            return false
+        })
         
         let isDanger = mapView.annotations.contains(where: { annotation in
             if let danger = annotation as? DangerAnnotation {
@@ -297,7 +354,10 @@ extension MapViewController: MKMapViewDelegate {
         let renderer = MKCircleRenderer(circle: circle)
         renderer.lineWidth = 1
         
-        if isDanger {
+        if isParking {
+            renderer.fillColor = UIColor.systemOrange.withAlphaComponent(0.1)
+            renderer.strokeColor = UIColor.systemOrange.withAlphaComponent(0.4)
+        } else if isDanger {
             renderer.fillColor = UIColor.systemRed.withAlphaComponent(0.1)
             renderer.strokeColor = UIColor.systemRed.withAlphaComponent(0.4)
         } else {
@@ -306,6 +366,22 @@ extension MapViewController: MKMapViewDelegate {
         }
         
         return renderer
+    }
+    
+    //MARK: - Annotation Selection Handler
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        guard let parking = view.annotation as? ParkInfoAnnotation else { return }
+        
+        let selectedAnnotation = parking
+        let currentMapView = mapView
+        
+        presentParkLocationView(parkedLocation: parkedLocation) { [weak currentMapView, weak selectedAnnotation] in
+            // dismiss 후 실행될 completion handler
+            // selectedAnnotation이 여전히 있다면 선택 해제
+            if let mapView = currentMapView, let annotation = selectedAnnotation {
+                mapView.deselectAnnotation(annotation, animated: true)
+            }
+        }
     }
     
     func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
@@ -353,18 +429,54 @@ extension MapViewController: UICollectionViewDataSource, UICollectionViewDelegat
 
 //MARK: - Actions
 extension MapViewController {
-    func goToNavigation(with data: NavigationData ) {
-        let destination = NaviLocation(name: data.title, x: data.x, y: data.y)
+    func goToNavigation(with data: NavigationData) {
+        let alert = UIAlertController(title: "네비게이션 앱 선택", message: "원하는 앱을 선택하세요", preferredStyle: .actionSheet)
         
-        guard let navigateUrl = NaviApi.shared.navigateUrl(destination: destination) else {
-            return
+        let kakaoAction = UIAlertAction(title: "Kakao Navigation", style: .default) { _ in
+            let destination = NaviLocation(name: data.title, x: data.x, y: data.y)
+            
+            guard let navigateUrl = NaviApi.shared.navigateUrl(destination: destination) else {
+                return
+            }
+            
+            if UIApplication.shared.canOpenURL(navigateUrl) {
+                UIApplication.shared.open(navigateUrl, options: [:], completionHandler: nil)
+            } else {
+                UIApplication.shared.open(NaviApi.webNaviInstallUrl, options: [:], completionHandler: nil)
+            }
         }
         
-        if UIApplication.shared.canOpenURL(navigateUrl) {
-            UIApplication.shared.open(navigateUrl, options: [:], completionHandler: nil)
-        } else {
-            UIApplication.shared.open(NaviApi.webNaviInstallUrl, options: [:], completionHandler: nil)
+        let appleAction = UIAlertAction(title: "Apple Map", style: .default) { _ in
+            self.startNavigationWithNative(with: data)
         }
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        
+        alert.addAction(kakaoAction)
+        alert.addAction(appleAction)
+        alert.addAction(cancelAction)
+        
+        
+        present(alert, animated:true, completion: nil)
+    }
+
+    func startNavigationWithNative(with data: NavigationData) {
+        
+        let destinationCoordinate = CLLocationCoordinate2D(latitude: data.latittude, longitude: data.longtitude)
+        
+        let destinationPlacemark = MKPlacemark(coordinate: destinationCoordinate)
+        let destinationMapItem = MKMapItem(placemark: destinationPlacemark)
+        destinationMapItem.name = data.title
+        
+        let launchOptions = [
+            MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving,
+            MKLaunchOptionsShowsTrafficKey: true
+        ] as [String: Any]
+        
+        MKMapItem.openMaps(
+            with: [destinationMapItem],
+            launchOptions: launchOptions
+        )
     }
     
     @objc private func zoomOutToSeoulWithDangerZone() {
@@ -448,5 +560,72 @@ extension MapViewController {
         safeFilterSubject.send(true)
         dangerFilterSubject.send(true)
         mainView.mapView.setCamera(camera, animated: true)
+    }
+    
+    @objc private func moveMapViewToParkedLocation() {
+        let status = locationManager.authorizationStatus
+        
+        guard status == .authorizedWhenInUse || status == .authorizedAlways,
+              let location = parkedLocation else {
+            print("위치 정보 없음 또는 권한 미허용")
+            return
+        }
+        
+        let camera = MKMapCamera()
+        let coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.latitude)
+        camera.centerCoordinate = coordinate
+        camera.altitude = 2000
+        camera.pitch = 0
+        camera.heading = 0
+        
+        mainView.mapView.setCamera(camera, animated: true)
+    }
+    
+    @objc private func navigateParkLocationViewWithButton() {
+        presentParkLocationView()
+    }
+    
+    private func presentParkLocationView(parkedLocation: ParkedLocation? = nil, completion: (() -> Void)? = nil) {
+        
+        var viewModel : ParkLocationViewModel
+        
+        if let parkedLocation {
+            let presentable = ParkedLocationPresentable(
+                latitude: parkedLocation.latitude, longitude: parkedLocation.longitude, title: parkedLocation.title, imagePath: parkedLocation.imagePath
+            )
+            
+            viewModel = ParkLocationViewModel(parkedLocation: presentable)
+        } else {
+            let location = currentLocationSubject.value
+            let latitude = location.coordinate.latitude
+            let longitude = location.coordinate.longitude
+            let address = bottomView.locationLabel.text ?? ""
+            
+            viewModel = ParkLocationViewModel(
+                parkedLocation: ParkedLocationPresentable(
+                    latitude: latitude,
+                    longitude: longitude,
+                    title: address,
+                    imagePath: nil
+                )
+            )
+        }
+        
+        let destination = ParkLocationViewController(viewModel: viewModel)
+        
+        destination.modalPresentationStyle = .custom
+        
+        destination.dismissCompletion = completion
+        
+        present(destination, animated: true)
+    }
+    
+    private func handlePakredInfoInteraction(hasInfo: Bool) {
+        mainView.makeAvailableParkedInfoButton(with: hasInfo)
+        bottomView.makeAvailableParkedInfoButton(with: hasInfo)
+    }
+    
+    private func handlerisDangerInfo(with isDanger: Bool) {
+        mainView.makeAvailableIsDangerousInfo(with: isDanger)
     }
 }

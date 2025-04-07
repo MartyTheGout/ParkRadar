@@ -34,6 +34,15 @@ class MainView: UIView {
         return button
     }()
     
+    let marqueeView = DangerMarqueeView()
+    
+    let parkedLocationButton: UIButton = {
+        let button = UIButton()
+        button.configuration = .iconStyle(imageName: "pin.fill", tintColor: .orange)
+        button.backgroundColor = .white.withAlphaComponent(0.9)
+        return button
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         configureViewHierarchy()
@@ -51,6 +60,8 @@ class MainView: UIView {
         addSubview(dangerFilterButton)
         addSubview(safeFilterButton)
         addSubview(userLocationButton)
+        addSubview(marqueeView)
+        addSubview(parkedLocationButton)
     }
     
     func configureViewConstraints() {
@@ -79,16 +90,36 @@ class MainView: UIView {
             $0.top.equalTo(upperTabView.snp.bottom).offset(4)
             $0.trailing.equalTo(safeAreaLayoutGuide).offset(-8)
         }
+        
+        marqueeView.snp.makeConstraints {
+            $0.top.equalTo(userLocationButton.snp.bottom).offset(4)
+            $0.horizontalEdges.equalTo(safeAreaLayoutGuide)
+        }
+        
+        parkedLocationButton.snp.makeConstraints {
+            $0.top.equalTo(userLocationButton.snp.bottom).offset(4)
+            $0.trailing.equalTo(safeAreaLayoutGuide).offset(-8)
+        }
     }
     
     func configureViewDetails() {
         backgroundColor = Color.Back.main.ui
+        marqueeView.isHidden = true
+    }
+    
+    func makeAvailableParkedInfoButton(with isValid: Bool) {
+        parkedLocationButton.isHidden = !isValid
+        parkedLocationButton.isUserInteractionEnabled = isValid
+    }
+    
+    func makeAvailableIsDangerousInfo(with isDangerous: Bool) {
+        marqueeView.isHidden = !isDangerous
     }
     
     override func draw(_ rect: CGRect) {
         super.draw(rect)
         
-        [safeFilterButton, dangerFilterButton, userLocationButton].forEach {
+        [safeFilterButton, dangerFilterButton, userLocationButton, parkedLocationButton].forEach {
             $0.layer.cornerRadius = 10
             $0.layer.masksToBounds = false
             $0.layer.shadowColor = UIColor.black.cgColor

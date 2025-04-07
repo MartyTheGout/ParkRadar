@@ -78,7 +78,7 @@ final class UpperTabView : UIView {
         
         noParkShowingButton.configuration = UIButton.Configuration.verticalStyle(title: "서울시 전체\n불법주정차구역", imageName: "eye.fill")
         
-        safeParkShowingButton.configuration  = UIButton.Configuration.verticalStyle(title: "서울시\n공영 주차장", imageName: "car.2.fill")
+        safeParkShowingButton.configuration  = UIButton.Configuration.verticalStyle(title: "서울시 전체\n공영 주차장", imageName: "car.2.fill")
         
         illegalExplanationButton.configuration = UIButton.Configuration.verticalStyle(title: "불법\n주정차벌금", imageName: "person.crop.square.filled.and.at.rectangle.fill")
     }
