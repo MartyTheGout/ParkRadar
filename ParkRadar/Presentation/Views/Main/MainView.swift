@@ -34,6 +34,8 @@ class MainView: UIView {
         return button
     }()
     
+    let marqueeView = DangerMarqueeView()
+    
     let parkedLocationButton: UIButton = {
         let button = UIButton()
         button.configuration = .iconStyle(imageName: "pin.fill", tintColor: .orange)
@@ -58,6 +60,7 @@ class MainView: UIView {
         addSubview(dangerFilterButton)
         addSubview(safeFilterButton)
         addSubview(userLocationButton)
+        addSubview(marqueeView)
         addSubview(parkedLocationButton)
     }
     
@@ -88,6 +91,11 @@ class MainView: UIView {
             $0.trailing.equalTo(safeAreaLayoutGuide).offset(-8)
         }
         
+        marqueeView.snp.makeConstraints {
+            $0.top.equalTo(userLocationButton.snp.bottom).offset(4)
+            $0.horizontalEdges.equalTo(safeAreaLayoutGuide)
+        }
+        
         parkedLocationButton.snp.makeConstraints {
             $0.top.equalTo(userLocationButton.snp.bottom).offset(4)
             $0.trailing.equalTo(safeAreaLayoutGuide).offset(-8)
@@ -96,11 +104,16 @@ class MainView: UIView {
     
     func configureViewDetails() {
         backgroundColor = Color.Back.main.ui
+        marqueeView.isHidden = true
     }
     
     func makeAvailableParkedInfoButton(with isValid: Bool) {
         parkedLocationButton.isHidden = !isValid
         parkedLocationButton.isUserInteractionEnabled = isValid
+    }
+    
+    func makeAvailableIsDangerousInfo(with isDangerous: Bool) {
+        marqueeView.isHidden = !isDangerous
     }
     
     override func draw(_ rect: CGRect) {

@@ -35,6 +35,7 @@ final class MapViewModel {
         let dangerFilterCondition: AnyPublisher<Bool, Never>
         
         let parkedLocation: AnyPublisher<ParkedLocation?, Never>
+        let isDangerInformation : AnyPublisher<Bool, Never>
     }
     
     let latestLocationAndZoom = CurrentValueSubject<(CLLocationCoordinate2D, CLLocationDistance), Never>((.init(), 0))
@@ -59,6 +60,8 @@ final class MapViewModel {
         let dangerFilterPub = CurrentValueSubject<Bool, Never>(true)
         
         let parkedInfoPub = CurrentValueSubject<ParkedLocation?, Never>(nil)
+        
+        let isDangerInfoPub = CurrentValueSubject<Bool, Never>(false)
         
         makeRealmDataSeq(in: parkedInfoPub)
         
@@ -127,6 +130,7 @@ final class MapViewModel {
                     
                     let safeObjects = repository.getSafeArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
                     let dangerObjects = repository.getDangerArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
+                    let isDanger = repository.isCurrentLocationDangerous(latitude: center.latitude, longitude: center.longitude)
                     
                     let safeAnnotations: [SafeAnnotation] = safeObjects.compactMap { SafeAnnotation(from: $0) }
                     let dangerAnnotations: [DangerAnnotation] = dangerObjects.compactMap { DangerAnnotation(from: $0) }
@@ -135,6 +139,7 @@ final class MapViewModel {
                     
                     safePub.send(safeFilterPub.value ? safeAnnotations : [])
                     dangerPub.send(dangerFilterPub.value ? dangerAnnotations : [])
+                    isDangerInfoPub.send(isDanger)
                     
                     parkingPub.send(sortedNearbyObjects)
                     
@@ -227,7 +232,8 @@ final class MapViewModel {
             convertedLocation: convertedAddressPub.eraseToAnyPublisher(),
             safeFilterCondition: safeFilterPub.eraseToAnyPublisher(),
             dangerFilterCondition: dangerFilterPub.eraseToAnyPublisher(),
-            parkedLocation: parkedInfoPub.eraseToAnyPublisher()
+            parkedLocation: parkedInfoPub.eraseToAnyPublisher(),
+            isDangerInformation: isDangerInfoPub.eraseToAnyPublisher()
         )
     }
 }

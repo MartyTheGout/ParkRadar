@@ -72,6 +72,7 @@ final class MapViewController: UIViewController {
         mainView.dangerFilterButton.addTarget(self, action: #selector(toggleDangerFilter), for: .touchUpInside)
         mainView.safeFilterButton.addTarget(self, action: #selector(toggleSafeFilter), for: .touchUpInside)
         mainView.userLocationButton.addTarget(self, action: #selector(moveMapViewToCurrentLocation), for: .touchUpInside)
+        mainView.parkedLocationButton.addTarget(self, action: #selector(moveMapViewToCurrentLocation), for: .touchUpInside)
     }
     
     private func setupLocationManager() {
@@ -152,6 +153,14 @@ final class MapViewController: UIViewController {
                 self?.parkedLocation = parkedInfo
     
                 self?.updateAnnotations(ofType: ParkInfoAnnotation.self, with: [ParkInfoAnnotation(from: parkedInfo)])
+                
+            }.store(in: &cancellables)
+        
+        output.isDangerInformation
+            .receive(on: RunLoop.main)
+            .sink { [weak self] isDanger in
+                print(isDanger)
+                self?.handlerisDangerInfo(with: isDanger)
                 
             }.store(in: &cancellables)
     }
@@ -517,6 +526,25 @@ extension MapViewController {
         mainView.mapView.setCamera(camera, animated: true)
     }
     
+    @objc private func moveMapViewToParkedLocation() {
+        let status = locationManager.authorizationStatus
+        
+        guard status == .authorizedWhenInUse || status == .authorizedAlways,
+              let location = parkedLocation else {
+            print("위치 정보 없음 또는 권한 미허용")
+            return
+        }
+        
+        let camera = MKMapCamera()
+        let coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.latitude)
+        camera.centerCoordinate = coordinate
+        camera.altitude = 2000
+        camera.pitch = 0
+        camera.heading = 0
+        
+        mainView.mapView.setCamera(camera, animated: true)
+    }
+    
     @objc private func navigateParkLocationViewWithButton() {
         presentParkLocationView()
     }
@@ -559,5 +587,9 @@ extension MapViewController {
     private func handlePakredInfoInteraction(hasInfo: Bool) {
         mainView.makeAvailableParkedInfoButton(with: hasInfo)
         bottomView.makeAvailableParkedInfoButton(with: hasInfo)
+    }
+    
+    private func handlerisDangerInfo(with isDanger: Bool) {
+        mainView.makeAvailableIsDangerousInfo(with: isDanger)
     }
 }
