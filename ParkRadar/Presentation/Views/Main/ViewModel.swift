@@ -210,7 +210,10 @@ final class MapViewModel {
                         return NavigationData(
                             title: info.address,
                             x: "\(result.x)",
-                            y: "\(result.y)"
+                            y: "\(result.y)",
+                            latittude: info.latitude!,
+                            longtitude: info.longitude!
+                    
                         )
                     }
                     .eraseToAnyPublisher()
@@ -283,4 +286,6 @@ struct NavigationData {
     var title : String
     var x: String
     var y: String
+    var latittude: Double
+    var longtitude: Double
 }

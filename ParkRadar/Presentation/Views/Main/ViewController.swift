@@ -429,18 +429,54 @@ extension MapViewController: UICollectionViewDataSource, UICollectionViewDelegat
 
 //MARK: - Actions
 extension MapViewController {
-    func goToNavigation(with data: NavigationData ) {
-        let destination = NaviLocation(name: data.title, x: data.x, y: data.y)
+    func goToNavigation(with data: NavigationData) {
+        let alert = UIAlertController(title: "네비게이션 앱 선택", message: "원하는 앱을 선택하세요", preferredStyle: .actionSheet)
         
-        guard let navigateUrl = NaviApi.shared.navigateUrl(destination: destination) else {
-            return
+        let kakaoAction = UIAlertAction(title: "Kakao Navigation", style: .default) { _ in
+            let destination = NaviLocation(name: data.title, x: data.x, y: data.y)
+            
+            guard let navigateUrl = NaviApi.shared.navigateUrl(destination: destination) else {
+                return
+            }
+            
+            if UIApplication.shared.canOpenURL(navigateUrl) {
+                UIApplication.shared.open(navigateUrl, options: [:], completionHandler: nil)
+            } else {
+                UIApplication.shared.open(NaviApi.webNaviInstallUrl, options: [:], completionHandler: nil)
+            }
         }
         
-        if UIApplication.shared.canOpenURL(navigateUrl) {
-            UIApplication.shared.open(navigateUrl, options: [:], completionHandler: nil)
-        } else {
-            UIApplication.shared.open(NaviApi.webNaviInstallUrl, options: [:], completionHandler: nil)
+        let appleAction = UIAlertAction(title: "Apple Map", style: .default) { _ in
+            self.startNavigationWithNative(with: data)
         }
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        
+        alert.addAction(kakaoAction)
+        alert.addAction(appleAction)
+        alert.addAction(cancelAction)
+        
+        
+        present(alert, animated:true, completion: nil)
+    }
+
+    func startNavigationWithNative(with data: NavigationData) {
+        
+        let destinationCoordinate = CLLocationCoordinate2D(latitude: data.latittude, longitude: data.longtitude)
+        
+        let destinationPlacemark = MKPlacemark(coordinate: destinationCoordinate)
+        let destinationMapItem = MKMapItem(placemark: destinationPlacemark)
+        destinationMapItem.name = data.title
+        
+        let launchOptions = [
+            MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving,
+            MKLaunchOptionsShowsTrafficKey: true
+        ] as [String: Any]
+        
+        MKMapItem.openMaps(
+            with: [destinationMapItem],
+            launchOptions: launchOptions
+        )
     }
     
     @objc private func zoomOutToSeoulWithDangerZone() {
