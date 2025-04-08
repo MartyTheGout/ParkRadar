@@ -34,6 +34,8 @@ final class MapViewController: UIViewController {
     
     private var parkedLocation: ParkedLocation?
     
+    private var mapStabilizerActivated = false // stabilizer's status value for having safer first map builder.
+    
     override func loadView() {
         self.view = mainView
     }
@@ -56,6 +58,11 @@ final class MapViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         bottomView.attach(to: self.view)
+        
+        if !mapStabilizerActivated {
+            mainView.userLocationButton.sendActions(for: .touchUpInside)
+            mapStabilizerActivated = true
+        }
     }
     
     private func setupMapView() {
@@ -158,7 +165,6 @@ final class MapViewController: UIViewController {
         output.isDangerInformation
             .receive(on: RunLoop.main)
             .sink { [weak self] isDanger in
-                print(isDanger)
                 self?.handlerisDangerInfo(with: isDanger)
                 
             }.store(in: &cancellables)
