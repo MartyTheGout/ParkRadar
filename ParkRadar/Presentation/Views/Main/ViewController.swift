@@ -72,7 +72,7 @@ final class MapViewController: UIViewController {
         mainView.dangerFilterButton.addTarget(self, action: #selector(toggleDangerFilter), for: .touchUpInside)
         mainView.safeFilterButton.addTarget(self, action: #selector(toggleSafeFilter), for: .touchUpInside)
         mainView.userLocationButton.addTarget(self, action: #selector(moveMapViewToCurrentLocation), for: .touchUpInside)
-        mainView.parkedLocationButton.addTarget(self, action: #selector(moveMapViewToCurrentLocation), for: .touchUpInside)
+        mainView.parkedLocationButton.addTarget(self, action: #selector(moveMapViewToParkedLocation), for: .touchUpInside)
     }
     
     private func setupLocationManager() {
@@ -144,14 +144,13 @@ final class MapViewController: UIViewController {
             .sink { [weak self] parkedInfo in
                 guard let parkedInfo else {
                     self?.handlePakredInfoInteraction(hasInfo: false)
+                    self?.parkedLocation = nil
                     self?.updateAnnotations(ofType: ParkInfoAnnotation.self, with: [])
                     return
                 }
                 
                 self?.handlePakredInfoInteraction(hasInfo: true)
-                
                 self?.parkedLocation = parkedInfo
-    
                 self?.updateAnnotations(ofType: ParkInfoAnnotation.self, with: [ParkInfoAnnotation(from: parkedInfo)])
                 
             }.store(in: &cancellables)
@@ -571,14 +570,16 @@ extension MapViewController {
             return
         }
         
-        let camera = MKMapCamera()
-        let coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.latitude)
-        camera.centerCoordinate = coordinate
-        camera.altitude = 2000
-        camera.pitch = 0
-        camera.heading = 0
-        
-        mainView.mapView.setCamera(camera, animated: true)
+        if let location = parkedLocation {
+            let camera = MKMapCamera()
+            let coordinate = CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+            camera.centerCoordinate = coordinate
+            camera.altitude = 2000
+            camera.pitch = 0
+            camera.heading = 0
+            
+            mainView.mapView.setCamera(camera, animated: true)
+        }
     }
     
     @objc private func navigateParkLocationViewWithButton() {
