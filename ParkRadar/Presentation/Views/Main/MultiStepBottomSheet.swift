@@ -24,7 +24,7 @@ final class MultiStepBottomSheet: UIView {
     
     private let grabber: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.gray.withAlphaComponent(0.3)
+        view.backgroundColor = UIColor.grabber.withAlphaComponent(0.3)
         view.layer.cornerRadius = 2.5
         return view
     }()
@@ -133,7 +133,8 @@ final class MultiStepBottomSheet: UIView {
     }
     
     private func configureViewDetail() {
-        backgroundColor = .white.withAlphaComponent(0.7)
+        
+        backgroundColor = UIColor.frontBack.withAlphaComponent(0.7)
         
         layer.cornerRadius = 16
         clipsToBounds = true

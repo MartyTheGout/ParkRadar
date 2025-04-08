@@ -37,7 +37,7 @@ final class ParkingInfoCell: UICollectionViewCell {
     
     private let goToNavButton : UIButton = {
         let button = UIButton()
-        button.configuration = .bigIconStyle(imageName: "arrow.triangle.turn.up.right.circle.fill", tintColor: .black)
+        button.configuration = .bigIconStyle(imageName: "arrow.triangle.turn.up.right.circle.fill", tintColor: UIColor.manualInfo)
         return button
     }()
     
@@ -49,7 +49,7 @@ final class ParkingInfoCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        contentView.backgroundColor = .white.withAlphaComponent(0.95)
+        contentView.backgroundColor = UIColor.frontBack.withAlphaComponent(0.95)
         contentView.layer.cornerRadius = 12
         contentView.layer.shadowColor = UIColor.black.cgColor
         contentView.layer.shadowOpacity = 0.05

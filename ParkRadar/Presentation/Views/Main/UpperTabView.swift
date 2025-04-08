@@ -74,7 +74,7 @@ final class UpperTabView : UIView {
     
     private func configureViewDetails() {
         
-        backgroundColor = Color.Back.main.ui.withAlphaComponent(0.5)
+        backgroundColor = UIColor.mainBack.withAlphaComponent(0.5)
         
         noParkShowingButton.configuration = UIButton.Configuration.verticalStyle(title: "서울시 전체\n불법주정차구역", imageName: "eye.fill")
         

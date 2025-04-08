@@ -209,7 +209,7 @@ extension MapViewController {
         let appearance = UINavigationBarAppearance()
         appearance.configureWithTransparentBackground()
         
-        appearance.backgroundColor = Color.Back.main.ui
+        appearance.backgroundColor = UIColor.mainBack
         appearance.shadowColor = .clear
         
         appearance.backgroundEffect = UIBlurEffect(style: .light)

@@ -26,8 +26,8 @@ final class FineDetailView: UIView {
     }
 
     private func setupView() {
-        backgroundColor = .white
-        scrollView.backgroundColor = Color.Back.main.ui.withAlphaComponent(0.7)
+        backgroundColor = UIColor.metaBack
+        scrollView.backgroundColor = UIColor.mainBack.withAlphaComponent(0.7)
         
         addSubview(scrollView)
         scrollView.snp.makeConstraints { $0.edges.equalToSuperview() }

@@ -45,7 +45,7 @@ extension UIButton.Configuration {
         let attributedTitle = NSAttributedString(string: title, attributes: [
             .font: UIFont.systemFont(ofSize: 11, weight: .regular),
             .paragraphStyle: paragraphStyle,
-            .foregroundColor : UIColor.black
+            .foregroundColor : UIColor.manualInfo
         ])
         
         config.attributedTitle = AttributedString(attributedTitle)
