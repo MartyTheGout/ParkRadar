@@ -12,7 +12,6 @@ class ImageHandler {
         guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
         
         let fileURL = documentDirectory.appendingPathComponent("\(fileName).jpg")
-        removeImageFromDocument(filename: fileName)
         
         guard let data = image.jpegData(compressionQuality: 0.5) else { return }
         

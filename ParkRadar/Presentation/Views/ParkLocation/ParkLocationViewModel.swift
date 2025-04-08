@@ -93,5 +93,6 @@ class ParkLocationViewModel: NSObject {
     
     func deleteLocation() {
         repository.deleteParkedLocation()
+        imageHandler.removeImageFromDocument(filename: "parkedInfo")
     }
 }
