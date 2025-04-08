@@ -48,7 +48,7 @@ final class MultiStepBottomSheet: UIView {
     let parkSavingButton: UIButton = {
         let button = UIButton()
         button.configuration = .horizontalStyle(title: "주차 위치 저장", imageName: "pin.fill", tintColor: .orange)
-        button.backgroundColor = .white.withAlphaComponent(0.9)
+        button.backgroundColor = UIColor.metaBack.withAlphaComponent(0.9)
         return button
     }()
     

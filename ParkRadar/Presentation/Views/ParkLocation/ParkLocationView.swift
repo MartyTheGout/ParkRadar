@@ -107,7 +107,7 @@ class ParkLocationView : UIView {
     }
     
     private func configureViewDetails() {
-        backgroundColor = .white
+        backgroundColor = .metaBack
         
         addressTitle.attributedText = NSAttributedString(string: "현재 위치", attributes: [
             .font : UIFont.systemFont(ofSize: 15, weight: .bold),
@@ -121,7 +121,7 @@ class ParkLocationView : UIView {
         let config = UIImage.SymbolConfiguration(pointSize: 30, weight: .medium)
         let image = UIImage(systemName: "camera.circle.fill", withConfiguration: config)
         photoButton.setImage(image, for: .normal)
-        photoButton.backgroundColor = .white
+        photoButton.backgroundColor = .metaBack
         photoButton.layer.cornerRadius = 30
         
         saveButton.setAttributedTitle(NSAttributedString(string: "저장하기", attributes: [
