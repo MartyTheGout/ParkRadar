@@ -73,7 +73,6 @@ final class FineDetailView: UIView {
             "• 차량번호로 체납된 주정차 위반 과태료를 조회/납부"
         ])
 
-        // 마지막 요소 아래 margin
         contentView.snp.makeConstraints { make in
             make.bottom.greaterThanOrEqualTo(lastBottom!).offset(20)
         }
@@ -95,7 +94,6 @@ final class FineDetailView: UIView {
     }
 
     private func addSubsection(title: String, items: [String]) {
-        // 타이틀
         let titleLabel = UILabel()
         titleLabel.text = title
         titleLabel.numberOfLines = 0
@@ -107,7 +105,6 @@ final class FineDetailView: UIView {
             make.top.equalTo(lastBottom!).offset(24)
         }
 
-        // 라운드 카드
         let cardView = UIView()
         cardView.backgroundColor = .white.withAlphaComponent(0.9)
         cardView.layer.cornerRadius = 12
@@ -143,7 +140,6 @@ final class FineDetailView: UIView {
             prevBottom = label.snp.bottom
         }
 
-        // 마지막 label의 하단 마진
         cardView.snp.makeConstraints { make in
             make.bottom.equalTo(prevBottom).offset(16)
         }
