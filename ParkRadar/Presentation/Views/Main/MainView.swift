@@ -23,7 +23,7 @@ class MainView: UIView {
     
     let safeFilterButton = {
         let button = UIButton()
-        button.configuration = .horizontalStyle(title: "서울시\n공영주차장", imageName: "car.2.fill", tintColor: Color.Subject.safe.ui)
+        button.configuration = .horizontalStyle(title: "서울시\n공영주차장", imageName: "car.2.fill", tintColor: UIColor.safeInfo)
         button.backgroundColor = UIColor.metaBack.withAlphaComponent(0.9)
         return button
     }()

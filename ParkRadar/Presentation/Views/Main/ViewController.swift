@@ -254,7 +254,7 @@ extension MapViewController: MKMapViewDelegate {
             
             view.canShowCallout = true
             view.clusteringIdentifier = "parkingCluster"
-            view.markerTintColor = cluster.identifier == "safeCluster" ? Color.Subject.safe.ui : .systemRed
+            view.markerTintColor = cluster.identifier == "safeCluster" ? UIColor.safeInfo : .systemRed
             
             view.glyphImage = cluster.identifier == "safeCluster" ? UIImage(systemName: "car.2.fill") : UIImage(systemName: "eye.fill") // ! glyphImage is applied to Annotation firstly, then glyphText
             
@@ -279,7 +279,7 @@ extension MapViewController: MKMapViewDelegate {
             
             view.canShowCallout = true
             view.clusteringIdentifier = "parking"
-            view.markerTintColor = Color.Subject.safe.ui
+            view.markerTintColor = UIColor.safeInfo
             
             if let symbolImage = UIImage(systemName: safe.symbolName) {
                 view.glyphImage = symbolImage // ! glyphImage is applied to Annotation firstly, then glyphText
@@ -570,8 +570,7 @@ extension MapViewController {
     @objc private func moveMapViewToParkedLocation() {
         let status = locationManager.authorizationStatus
         
-        guard status == .authorizedWhenInUse || status == .authorizedAlways,
-              let location = parkedLocation else {
+        guard status == .authorizedWhenInUse || status == .authorizedAlways else {
             print("위치 정보 없음 또는 권한 미허용")
             return
         }
