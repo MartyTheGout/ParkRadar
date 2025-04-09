@@ -13,6 +13,11 @@ protocol RepositoryProtocol {
     func getSafeArea(latitude : Double, longitude: Double, altitude: CLLocationDistance) -> Results<SafeParkingArea>
     func getDangerArea(latitude : Double, longitude: Double, altitude: CLLocationDistance) -> Results<NoParkingArea>
     func getParkedLocation() -> Results<ParkedLocation>
+    func getSafeAreaCluster() -> Results<SafeParkingArea>
+    func getDangerAreaCluster() -> Results<NoParkingArea>
+    func saveParkedLocation(_ location: ParkedLocation) -> Void
+    func deleteParkedLocation() -> Void
+    func isCurrentLocationDangerous(latitude : Double, longitude: Double) -> Bool
 }
 
 final class Repository: RepositoryProtocol {

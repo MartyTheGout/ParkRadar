@@ -43,7 +43,7 @@
 		40B7EAD42D93F21900BCF577 /* Exceptions for "ParkRadar" folder in "ParkRadar" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				Resource/Info.plist,
 			);
 			target = 40B7EAC12D93F21800BCF577 /* ParkRadar */;
 		};
