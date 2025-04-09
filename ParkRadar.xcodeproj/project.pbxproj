@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4053F6952DA64E990096D371 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 4053F6942DA64E990096D371 /* FirebaseAnalytics */; };
+		4053F6972DA64E990096D371 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 4053F6962DA64E990096D371 /* FirebaseCrashlytics */; };
 		40B7F2002D98F74200BCF577 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 40B7F1FF2D98F74200BCF577 /* SnapKit */; };
 		40B7F2032D98F7BF00BCF577 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 40B7F2022D98F7BF00BCF577 /* RealmSwift */; };
 		40B7F2042D98F7C900BCF577 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 40B7F2022D98F7BF00BCF577 /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -67,6 +69,8 @@
 			files = (
 				40B7F8E52D9D1FA900BCF577 /* KakaoSDKNavi in Frameworks */,
 				40B7F2032D98F7BF00BCF577 /* RealmSwift in Frameworks */,
+				4053F6972DA64E990096D371 /* FirebaseCrashlytics in Frameworks */,
+				4053F6952DA64E990096D371 /* FirebaseAnalytics in Frameworks */,
 				40B7F2002D98F74200BCF577 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -105,6 +109,7 @@
 				40B7EABF2D93F21800BCF577 /* Frameworks */,
 				40B7EAC02D93F21800BCF577 /* Resources */,
 				40B7F2052D98F7C900BCF577 /* Embed Frameworks */,
+				4053F6982DA6523D0096D371 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -118,6 +123,8 @@
 				40B7F1FF2D98F74200BCF577 /* SnapKit */,
 				40B7F2022D98F7BF00BCF577 /* RealmSwift */,
 				40B7F8E42D9D1FA900BCF577 /* KakaoSDKNavi */,
+				4053F6942DA64E990096D371 /* FirebaseAnalytics */,
+				4053F6962DA64E990096D371 /* FirebaseCrashlytics */,
 			);
 			productName = ParkRadar;
 			productReference = 40B7EAC22D93F21800BCF577 /* ParkRadar.app */;
@@ -151,6 +158,7 @@
 				40B7F1FE2D98F74200BCF577 /* XCRemoteSwiftPackageReference "SnapKit" */,
 				40B7F2012D98F7BF00BCF577 /* XCRemoteSwiftPackageReference "realm-swift" */,
 				40B7F8E32D9D1FA900BCF577 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
+				4053F6932DA64E990096D371 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 40B7EAC32D93F21800BCF577 /* Products */;
@@ -176,6 +184,32 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		4053F6982DA6523D0096D371 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}.debug.dylib",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		40B7EABE2D93F21800BCF577 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -196,6 +230,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = BU56QU36XP;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ParkRadar/Resource/Info.plist;
@@ -408,6 +443,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		4053F6932DA64E990096D371 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.11.0;
+			};
+		};
 		40B7F1FE2D98F74200BCF577 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
@@ -435,6 +478,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4053F6942DA64E990096D371 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4053F6932DA64E990096D371 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		4053F6962DA64E990096D371 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4053F6932DA64E990096D371 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
 		40B7F1FF2D98F74200BCF577 /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 40B7F1FE2D98F74200BCF577 /* XCRemoteSwiftPackageReference "SnapKit" */;
