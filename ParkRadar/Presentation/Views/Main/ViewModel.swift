@@ -5,12 +5,16 @@ import CoreLocation
 import MapKit
 
 final class MapViewModel {
-    
-    let geocodingService = GeocodingService()
-    
-    let repository = Repository()
-    
+
+    let repository: Repository
+    let geocodingService : GeocodingService
+
     var notificationToken : NotificationToken?
+    
+    init(repository: Repository, geocodingService: GeocodingService) {
+        self.repository = repository
+        self.geocodingService = geocodingService
+    }
     
     struct Input {
         let currentCenter: AnyPublisher<CLLocationCoordinate2D, Never>

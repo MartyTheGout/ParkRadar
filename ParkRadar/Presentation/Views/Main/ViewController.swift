@@ -13,18 +13,17 @@ import KakaoSDKNavi
 
 final class MapViewController: UIViewController {
     
+    private let viewModel: MapViewModel
+    
     private let mainView = MainView()
     private let bottomView = MultiStepBottomSheet()
     private let locationManager = CLLocationManager()
-    private let viewModel = MapViewModel()
     
     private var cancellables = Set<AnyCancellable>()
-    
     private let currentLocationSubject = CurrentValueSubject<CLLocation, Never>(.init())
     private let currentCenterSubject = CurrentValueSubject<CLLocationCoordinate2D, Never>(.init())
     private let currentAltitudeSubject = CurrentValueSubject<CLLocationDistance, Never>(0)
     private let selectedParkingSubject = CurrentValueSubject<SafeParkingArea, Never>(.init())
-    
     private let safeFilterSubject = CurrentValueSubject<Bool, Never>(true)
     private let dangerFilterSubject = CurrentValueSubject<Bool, Never>(true)
     
@@ -35,6 +34,15 @@ final class MapViewController: UIViewController {
     private var parkedLocation: ParkedLocation?
     
     private var mapStabilizerActivated = false // stabilizer's status value for having safer first map builder.
+    
+    init(viewModel: MapViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func loadView() {
         self.view = mainView
@@ -464,7 +472,7 @@ extension MapViewController {
         
         present(alert, animated:true, completion: nil)
     }
-
+    
     func startNavigationWithNative(with data: NavigationData) {
         
         let destinationCoordinate = CLLocationCoordinate2D(latitude: data.latittude, longitude: data.longtitude)
@@ -593,31 +601,27 @@ extension MapViewController {
     
     private func presentParkLocationView(parkedLocation: ParkedLocation? = nil, completion: (() -> Void)? = nil) {
         
-        var viewModel : ParkLocationViewModel
+        var presentable: ParkedLocationPresentable
         
         if let parkedLocation {
-            let presentable = ParkedLocationPresentable(
+            presentable = ParkedLocationPresentable(
                 latitude: parkedLocation.latitude, longitude: parkedLocation.longitude, title: parkedLocation.title, imagePath: parkedLocation.imagePath
             )
-            
-            viewModel = ParkLocationViewModel(parkedLocation: presentable)
         } else {
             let location = currentLocationSubject.value
             let latitude = location.coordinate.latitude
             let longitude = location.coordinate.longitude
             let address = bottomView.locationLabel.text ?? ""
             
-            viewModel = ParkLocationViewModel(
-                parkedLocation: ParkedLocationPresentable(
-                    latitude: latitude,
-                    longitude: longitude,
-                    title: address,
-                    imagePath: nil
-                )
+            presentable = ParkedLocationPresentable(
+                latitude: latitude,
+                longitude: longitude,
+                title: address,
+                imagePath: nil
             )
         }
         
-        let destination = ParkLocationViewController(viewModel: viewModel)
+        let destination = ParkLocationViewController(viewModel: DIContainer.shared.makeParkLocationViewModel(with: presentable))
         
         destination.modalPresentationStyle = .custom
         

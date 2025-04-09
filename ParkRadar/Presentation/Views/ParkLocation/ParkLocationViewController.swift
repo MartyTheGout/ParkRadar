@@ -14,7 +14,6 @@ class ParkLocationViewController: UIViewController, UINavigationControllerDelega
     private let viewModel: ParkLocationViewModel
     
     private let mainView = ParkLocationView()
-    private let imageHandler = ImageHandler()
     
     var dismissCompletion: (() -> Void)?
     

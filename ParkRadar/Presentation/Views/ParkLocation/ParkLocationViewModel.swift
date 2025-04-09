@@ -18,8 +18,8 @@ struct ParkedLocationPresentable {
 
 class ParkLocationViewModel: NSObject {
     // MARK: - Properties
-    private let repository = Repository()
-    private let imageHandler = ImageHandler()
+    private let repository: Repository
+    private let imageHandler: ImageHandler
     
     private let locationManager = CLLocationManager()
     
@@ -30,8 +30,10 @@ class ParkLocationViewModel: NSObject {
     var forSave = true
     
     // MARK: - Initialization
-    init(parkedLocation: ParkedLocationPresentable) {
-        super.init()
+    init(parkedLocation: ParkedLocationPresentable, repository: Repository, imageHandler: ImageHandler) {
+        
+        self.repository = repository
+        self.imageHandler = imageHandler
         
         let location = CLLocation(
             latitude: parkedLocation.latitude,
