@@ -198,7 +198,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = BU56QU36XP;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ParkRadar/Info.plist;
+				INFOPLIST_FILE = ParkRadar/Resource/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Park Radar";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSCameraUsageDescription = "(Required) The camera feature is necessary for providing image information of where users pared thier car at ";
@@ -237,7 +237,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = BU56QU36XP;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ParkRadar/Info.plist;
+				INFOPLIST_FILE = ParkRadar/Resource/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Park Radar";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSCameraUsageDescription = "(Required) The camera feature is necessary for providing image information of where users pared thier car at ";
