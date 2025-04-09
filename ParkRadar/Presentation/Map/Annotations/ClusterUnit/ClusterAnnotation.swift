@@ -23,11 +23,7 @@ final class ClusterAnnotation: NSObject, MKAnnotation {
     }
 }
 
-struct ClusterSummary {
-    let coordinate: CLLocationCoordinate2D
-    let count: Int
-    let geohash: String
-}
+
 
 extension Collection where Element == Double {
     var average: Double {
