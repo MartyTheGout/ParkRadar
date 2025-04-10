@@ -7,7 +7,7 @@
 
 import MapKit
 
-struct ClusterSummary {
+struct SetSummary {
     let coordinate: CLLocationCoordinate2D
     let count: Int
     let geohash: String

@@ -7,7 +7,7 @@
 
 import MapKit
 
-final class SafeAnnotation: NSObject, MKAnnotation {
+final class SafeAnnotation: NSObject, RadarAnnotaion {
     let coordinate: CLLocationCoordinate2D
     let title: String?
     let subtitle: String?
@@ -21,3 +21,23 @@ final class SafeAnnotation: NSObject, MKAnnotation {
     }
 }
 
+class SafeAnnotationView: MKMarkerAnnotationView {
+
+    static let ReuseID = "safeAnnotation"
+
+    override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
+        super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
+        clusteringIdentifier = "safe"
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func prepareForDisplay() {
+        super.prepareForDisplay()
+        displayPriority = .defaultHigh
+        markerTintColor = UIColor.safeInfo
+        glyphImage = UIImage(systemName: "car.2.fill")
+    }
+}

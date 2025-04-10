@@ -80,6 +80,13 @@ final class MapViewController: UIViewController {
         mainView.mapView.delegate = self
         mainView.mapView.showsUserLocation = true
         
+        mainView.mapView.register(SafeAnnotationView.self, forAnnotationViewWithReuseIdentifier: SafeAnnotationView.ReuseID)
+        mainView.mapView.register(DangerAnnotationView.self, forAnnotationViewWithReuseIdentifier: DangerAnnotationView.ReuseID)
+        mainView.mapView.register(ParkInfoAnnotationView.self, forAnnotationViewWithReuseIdentifier: ParkInfoAnnotationView.ReuseID)
+        mainView.mapView.register(DangerSetAnnotationView.self, forAnnotationViewWithReuseIdentifier: DangerSetAnnotationView.ReuseID)
+        mainView.mapView.register(SafeSetAnnotationView.self, forAnnotationViewWithReuseIdentifier: SafeSetAnnotationView.ReuseID)
+        mainView.mapView.register(ClusterAnnotationView.self, forAnnotationViewWithReuseIdentifier: MKMapViewDefaultClusterAnnotationViewReuseIdentifier)
+        
         mainView.upperTabView.noParkShowingButton.addTarget(self, action: #selector(zoomOutToSeoulWithDangerZone), for: .touchUpInside)
         mainView.upperTabView.safeParkShowingButton.addTarget(self, action: #selector(zoomOutToSeoulWithSafeZone), for: .touchUpInside)
         mainView.upperTabView.illegalExplanationButton.addTarget(self, action: #selector(goToFineDetailViewController), for: .touchUpInside)
@@ -126,10 +133,17 @@ final class MapViewController: UIViewController {
             }
             .store(in: &cancellables)
         
-        output.clusters
+        output.safeSets
             .receive(on: RunLoop.main)
             .sink { [weak self] clusterAnnotations in
-                self?.updateAnnotations(ofType: ClusterAnnotation.self, with: clusterAnnotations)
+                self?.updateAnnotations(ofType: SafeSetAnnotation.self, with: clusterAnnotations)
+            }
+            .store(in: &cancellables)
+        
+        output.dangerSets
+            .receive(on: RunLoop.main)
+            .sink { [weak self] clusterAnnotations in
+                self?.updateAnnotations(ofType: DangerSetAnnotation.self, with: clusterAnnotations)
             }
             .store(in: &cancellables)
         
@@ -203,7 +217,7 @@ final class MapViewController: UIViewController {
         
         mainView.mapView.addAnnotations(toAdd)
         
-        let radius = type is ClusterAnnotation.Type ? 1800 : zoneRadius
+        let radius = type is SafeSetAnnotation.Type || type is DangerSetAnnotation.Type ? 1800 : zoneRadius
         
         for annotation in toAdd {
             let circle = MKCircle(center: annotation.coordinate, radius: radius)
@@ -251,90 +265,22 @@ extension MapViewController: CLLocationManagerDelegate {
 extension MapViewController: MKMapViewDelegate {
     // MARK: - Annotation View
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        if annotation is MKUserLocation {
-            return nil
+        switch annotation {
+        case is SafeSetAnnotation:
+            return SafeSetAnnotationView(annotation: annotation, reuseIdentifier: SafeAnnotationView.ReuseID)
+        case is DangerSetAnnotation:
+            return DangerSetAnnotationView(annotation: annotation, reuseIdentifier: SafeAnnotationView.ReuseID)
+        case is SafeAnnotation:
+            return SafeAnnotationView(annotation: annotation, reuseIdentifier: SafeAnnotationView.ReuseID)
+        case is DangerAnnotation:
+            return DangerAnnotationView(annotation: annotation, reuseIdentifier: DangerAnnotationView.ReuseID)
+        case is ParkInfoAnnotation:
+            return ParkInfoAnnotationView(annotation: annotation, reuseIdentifier: ParkInfoAnnotationView.ReuseID)
+        default: return nil
         }
-        
-        if let cluster = annotation as? ClusterAnnotation {
-            let identifier = "Cluster"
-            let view = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
-            ?? MKMarkerAnnotationView(annotation: cluster, reuseIdentifier: identifier)
-            
-            view.canShowCallout = true
-            view.clusteringIdentifier = "parkingCluster"
-            view.markerTintColor = cluster.identifier == "safeCluster" ? UIColor.safeInfo : .systemRed
-            
-            view.glyphImage = cluster.identifier == "safeCluster" ? UIImage(systemName: "car.2.fill") : UIImage(systemName: "eye.fill") // ! glyphImage is applied to Annotation firstly, then glyphText
-            
-            return view
-        }
-        
-        if let cluster = annotation as? MKClusterAnnotation {
-            let identifier = "Cluster"
-            let view = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
-            ?? MKMarkerAnnotationView(annotation: cluster, reuseIdentifier: identifier)
-            
-            view.markerTintColor = .systemGray
-            view.glyphText = "\(cluster.memberAnnotations.count)"
-            view.displayPriority = .required
-            return view
-        }
-        
-        if let safe = annotation as? SafeAnnotation {
-            let identifier = "SafeAnnotation"
-            let view = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
-            ?? MKMarkerAnnotationView(annotation: safe, reuseIdentifier: identifier)
-            
-            view.canShowCallout = true
-            view.clusteringIdentifier = "parking"
-            view.markerTintColor = UIColor.safeInfo
-            
-            if let symbolImage = UIImage(systemName: safe.symbolName) {
-                view.glyphImage = symbolImage // ! glyphImage is applied to Annotation firstly, then glyphText
-            } else {
-                view.glyphText = "P"
-            }
-            return view
-        }
-        
-        if let danger = annotation as? DangerAnnotation {
-            let identifier = "DangerAnnotation"
-            let view = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
-            ?? MKMarkerAnnotationView(annotation: danger, reuseIdentifier: identifier)
-            
-            view.canShowCallout = true
-            view.clusteringIdentifier = "danger"
-            view.markerTintColor = .systemRed
-            
-            if let symbolImage = UIImage(systemName: danger.symbolName) {
-                view.glyphImage = symbolImage
-            } else {
-                view.glyphText = "!"
-            }
-            return view
-        }
-        
-        if let parkedInfo = annotation as? ParkInfoAnnotation {
-            let identifier = "ParkInfoAnnotation"
-            let view = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
-            ?? MKMarkerAnnotationView(annotation: parkedInfo, reuseIdentifier: identifier)
-            
-            view.canShowCallout = true
-            view.markerTintColor = .systemOrange
-            
-            if let symbolImage = UIImage(systemName: parkedInfo.symbolName) {
-                view.glyphImage = symbolImage
-            } else {
-                view.glyphText = "!"
-            }
-            
-            return view
-        }
-        
-        return nil
     }
     
-    // MARK: - Overlay View (예: 반경 표시)
+    // MARK: - Overlay View (반경 표시)
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         guard let circle = overlay as? MKCircle else {
             return MKOverlayRenderer(overlay: overlay)
@@ -354,13 +300,10 @@ extension MapViewController: MKMapViewDelegate {
                 danger.coordinate.longitude == circle.coordinate.longitude
             }
             
-            if let danger = annotation as? ClusterAnnotation {
-                if danger.identifier == "dangerCluster" {
-                    return danger.coordinate.latitude == circle.coordinate.latitude &&
-                    danger.coordinate.longitude == circle.coordinate.longitude
-                }
+            if let danger = annotation as? DangerSetAnnotation {
+                return danger.coordinate.latitude == circle.coordinate.latitude &&
+                danger.coordinate.longitude == circle.coordinate.longitude
             }
-            
             return false
         })
         
@@ -377,7 +320,6 @@ extension MapViewController: MKMapViewDelegate {
             renderer.fillColor = UIColor.systemGreen.withAlphaComponent(0.1)
             renderer.strokeColor = UIColor.systemGreen.withAlphaComponent(0.4)
         }
-        
         return renderer
     }
     

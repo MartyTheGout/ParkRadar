@@ -29,7 +29,8 @@ final class MapViewModel {
         let safeAnnotations: AnyPublisher<[SafeAnnotation], Never>
         let dangerAnnotations: AnyPublisher<[DangerAnnotation], Never>
         
-        let clusters: AnyPublisher<[ClusterAnnotation], Never>
+        let safeSets: AnyPublisher<[SafeSetAnnotation], Never>
+        let dangerSets: AnyPublisher<[DangerSetAnnotation], Never>
         
         let addressInformation: AnyPublisher<String, Never>
         let parkingInformation: AnyPublisher<[SafeParkingArea], Never>
@@ -54,7 +55,8 @@ final class MapViewModel {
         let safePub = PassthroughSubject<[SafeAnnotation], Never>()
         let dangerPub = PassthroughSubject<[DangerAnnotation], Never>()
         
-        let clusterPub = PassthroughSubject<[ClusterAnnotation], Never>()
+        let safeSetsPub = PassthroughSubject<[SafeSetAnnotation], Never>()
+        let dangerSetsPub = PassthroughSubject<[DangerSetAnnotation], Never>()
         
         let addressPub = PassthroughSubject<String, Never>()
         let parkingPub = PassthroughSubject<[SafeParkingArea], Never>()
@@ -130,7 +132,8 @@ final class MapViewModel {
                 guard let self = self else { return }
                 
                 if altitude <= 10000 {
-                    clusterPub.send([])
+                    safeSetsPub.send([])
+                    dangerSetsPub.send([])
                     
                     let safeObjects = repository.getSafeArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
                     let dangerObjects = repository.getDangerArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
@@ -154,8 +157,7 @@ final class MapViewModel {
                     let precision = 5 // available to control value based on altitude
                     let safeAll = repository.getSafeAreaCluster()
                     let dangeAll = repository.getDangerAreaCluster()
-                    
-                    var output : [ClusterAnnotation] = []
+                
                     
                     if safeFilterPub.value {
                         let safeClusters = Dictionary(grouping: safeAll) { obj in
@@ -163,20 +165,20 @@ final class MapViewModel {
                             return String(geohash.prefix(precision))
                         }
                         
-                        let summaries: [ClusterAnnotation] = safeClusters.map { (hash, group) in
+                        let summaries: [SafeSetAnnotation] = safeClusters.map { (hash, group) in
                             let latAvg = group.compactMap { $0.latitude }.average
                             let lngAvg = group.compactMap { $0.longitude }.average
                             
-                            let summary = ClusterSummary(
+                            let summary = SetSummary(
                                 coordinate: CLLocationCoordinate2D(latitude: latAvg, longitude: lngAvg),
                                 count: group.count,
                                 geohash: String(hash)
                             )
                             
-                            return ClusterAnnotation(identifier: "safeCluster", coordinate: summary.coordinate, count: summary.count)
+                            return SafeSetAnnotation(identifier: "safeCluster", coordinate: summary.coordinate, count: summary.count)
                         }
                         
-                        output.append(contentsOf: summaries)
+                        safeSetsPub.send(summaries)
                     }
                     
                     if dangerFilterPub.value {
@@ -184,19 +186,18 @@ final class MapViewModel {
                             obj.geohash.prefix(precision)
                         }
                         
-                        let summaries: [ClusterAnnotation] = dangerCluster.map { (hash, group) in
+                        let summaries: [DangerSetAnnotation] = dangerCluster.map { (hash, group) in
                             let latAvg = group.compactMap { $0.latitude }.average
                             let lngAvg = group.compactMap { $0.longitude }.average
-                            let summary = ClusterSummary(
+                            let summary = SetSummary(
                                 coordinate: CLLocationCoordinate2D(latitude: latAvg, longitude: lngAvg),
                                 count: group.count,
                                 geohash: String(hash)
                             )
-                            return ClusterAnnotation(identifier: "dangerCluster", coordinate: summary.coordinate, count: summary.count)
+                            return DangerSetAnnotation(identifier: "dangerCluster", coordinate: summary.coordinate, count: summary.count)
                         }
-                        output.append(contentsOf: summaries)
+                        dangerSetsPub.send(summaries)
                     }
-                    clusterPub.send(output)
                 }
             }
             .store(in: &cancellables)
@@ -233,7 +234,8 @@ final class MapViewModel {
         return Output(
             safeAnnotations: safePub.eraseToAnyPublisher(),
             dangerAnnotations: dangerPub.eraseToAnyPublisher(),
-            clusters: clusterPub.eraseToAnyPublisher(),
+            safeSets: safeSetsPub.eraseToAnyPublisher(),
+            dangerSets: dangerSetsPub.eraseToAnyPublisher(),
             addressInformation: addressPub.eraseToAnyPublisher(),
             parkingInformation: parkingPub.eraseToAnyPublisher(),
             convertedLocation: convertedAddressPub.eraseToAnyPublisher(),
