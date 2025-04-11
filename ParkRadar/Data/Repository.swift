@@ -133,6 +133,7 @@ final class Repository: RepositoryProtocol {
     }
     
     func isCurrentLocationDangerous(latitude : Double, longitude: Double) -> Bool {
+        
         let (latDelta, lngDelta) = metersToLatLngDelta(50, at: latitude)
         
         let baseLat = Int(latitude * 10000)
@@ -140,22 +141,23 @@ final class Repository: RepositoryProtocol {
         let latMin = baseLat - deltaLat
         let latMax = baseLat + deltaLat
         
-        let baseLng = Int(longitude * 10000) // need to Check 1000은 50m을 반영할 수 있는 수치인가?
+        let baseLng = Int(longitude * 10000)
         let deltaLng = Int(lngDelta * 10000)
         let lngMin = baseLng - deltaLng
         let lngMax = baseLng + deltaLng
-        
-        
+    
         if let lastLat = lastCheckedLatRange, lastLat.contains(latMin) && lastLat.contains(latMax),
            let lastLng = lastCheckedLngRange, lastLng.contains(lngMin) && lastLng.contains(lngMax) {
             return lastKnownResult! // cached value
         }
         
-        return !realm.objects(NoParkingArea.self)
+        let result = realm.objects(NoParkingArea.self)
             .where {
                 $0.latInt >= latMin && $0.latInt <= latMax &&
                 $0.lngInt >= lngMin && $0.lngInt <= lngMax
-            }.isEmpty
+            }
+        
+        return !result.isEmpty
     }
 }
 

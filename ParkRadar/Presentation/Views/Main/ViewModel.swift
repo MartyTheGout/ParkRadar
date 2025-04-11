@@ -77,6 +77,14 @@ final class MapViewModel {
         repository.checkVersionAndPath() //for debugging
         
         input.currentLocation
+            .sink { [weak self] location in
+                guard let self = self else { return }
+                let isDanger = repository.isCurrentLocationDangerous(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+                isDangerInfoPub.send(isDanger)
+                
+            }.store(in: &cancellables)
+        
+        input.currentLocation
             .flatMap { location in
                 self.geocodingService.reverseGeocode(location: location)
             }
@@ -159,7 +167,7 @@ final class MapViewModel {
                     
                     let safeObjects = repository.getSafeArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
                     let dangerObjects = repository.getDangerArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
-                    let isDanger = repository.isCurrentLocationDangerous(latitude: center.latitude, longitude: center.longitude)
+                    
                     
                     let safeAnnotations: [SafeAnnotation] = safeObjects.compactMap { SafeAnnotation(from: $0) }
                     let dangerAnnotations: [DangerAnnotation] = dangerObjects.compactMap { DangerAnnotation(from: $0) }
@@ -168,7 +176,7 @@ final class MapViewModel {
                     
                     safePub.send(safeFilterPub.value ? safeAnnotations : [])
                     dangerPub.send(dangerFilterPub.value ? dangerAnnotations : [])
-                    isDangerInfoPub.send(isDanger)
+                    
                     
                     parkingAreasPub.send(sortedNearbyObjects)
                     
@@ -258,10 +266,10 @@ extension MapViewModel {
         notificationToken = parkedLocationRecords.observe { changes in
             switch changes {
             case .initial(let results) :
-                print(" Initial — count: \(results.count)")
+                print(" ParkingLocation, Initial — count: \(results.count)")
                 subject.send(results.first)
             case .update(let results, let deletions, let insertions, let modifications) :
-                print(" Update — D:\(deletions), I:\(insertions), M:\(modifications), count: \(results.count)")
+                print(" ParkingLocation, Update — D:\(deletions), I:\(insertions), M:\(modifications), count: \(results.count)")
                 if results.isEmpty {
                     subject.send(nil)
                 } else {

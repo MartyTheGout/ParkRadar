@@ -93,8 +93,8 @@ class MainView: UIView {
         }
         
         marqueeView.snp.makeConstraints {
-            $0.top.equalTo(userLocationButton.snp.bottom).offset(4)
-            $0.horizontalEdges.equalTo(safeAreaLayoutGuide)
+            $0.top.equalTo(dangerFilterButton.snp.bottom).offset(8)
+            $0.leading.equalTo(dangerFilterButton)
         }
         
         parkedLocationButton.snp.makeConstraints {
