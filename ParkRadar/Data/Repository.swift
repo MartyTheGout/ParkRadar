@@ -24,8 +24,11 @@ final class Repository: RepositoryProtocol {
     
     private let realm: Realm = try! Realm()
     
-    func showFilePath() {
-        print(realm.configuration.fileURL!)
+    func checkVersionAndPath() {
+        let realmPath = realm.configuration.fileURL!
+        let version = try! schemaVersionAtURL(realm.configuration.fileURL!)
+        print(version, realmPath)
+        
     }
     
     private var lastCheckedLatRange: ClosedRange<Int>?
@@ -35,10 +38,10 @@ final class Repository: RepositoryProtocol {
     
     func getSafeArea(latitude : Double, longitude: Double, altitude: CLLocationDistance ) -> Results<SafeParkingArea> {
         let delta = dynamicLatLngDelta(from: altitude)
-        let latMin = Int((latitude - delta) * 1000)
-        let latMax = Int((latitude + delta) * 1000)
-        let lngMin = Int((longitude - delta) * 1000)
-        let lngMax = Int((longitude + delta) * 1000)
+        let latMin = Int((latitude - delta) * 10000)
+        let latMax = Int((latitude + delta) * 10000)
+        let lngMin = Int((longitude - delta) * 10000)
+        let lngMax = Int((longitude + delta) * 10000)
         
         let safeObjects = self.realm.objects(SafeParkingArea.self)
             .where {
@@ -54,10 +57,10 @@ final class Repository: RepositoryProtocol {
     
     func getDangerArea(latitude : Double, longitude: Double, altitude: CLLocationDistance) -> Results<NoParkingArea> {
         let delta = dynamicLatLngDelta(from: altitude)
-        let latMin = Int((latitude - delta) * 1000)
-        let latMax = Int((latitude + delta) * 1000)
-        let lngMin = Int((longitude - delta) * 1000)
-        let lngMax = Int((longitude + delta) * 1000)
+        let latMin = Int((latitude - delta) * 10000)
+        let latMax = Int((latitude + delta) * 10000)
+        let lngMin = Int((longitude - delta) * 10000)
+        let lngMax = Int((longitude + delta) * 10000)
         
         let dangerObjects = self.realm.objects(NoParkingArea.self)
             .where {
@@ -72,13 +75,13 @@ final class Repository: RepositoryProtocol {
     
     func getClosestParkingAreas(latitude : Double, longitude: Double) -> [SafeParkingArea] {
         let fixedDelta = 0.02
-        let latMin = Int((latitude - fixedDelta) * 1000)
-        let latMax = Int((latitude + fixedDelta) * 1000)
-        let lngMin = Int((longitude - fixedDelta) * 1000)
-        let lngMax = Int((longitude + fixedDelta) * 1000)
+        let latMin = Int((latitude - fixedDelta) * 10000)
+        let latMax = Int((latitude + fixedDelta) * 10000)
+        let lngMin = Int((longitude - fixedDelta) * 10000)
+        let lngMax = Int((longitude + fixedDelta) * 10000)
         
-        let centerLatIndex = Int(latitude * 1000)
-        let centerLngIndex = Int(longitude * 1000)
+        let centerLatIndex = Int(latitude * 10000)
+        let centerLngIndex = Int(longitude * 10000)
         
         let safeObjects = self.realm.objects(SafeParkingArea.self)
             .where {
@@ -130,15 +133,15 @@ final class Repository: RepositoryProtocol {
     }
     
     func isCurrentLocationDangerous(latitude : Double, longitude: Double) -> Bool {
-        let (latDelta, lngDelta) = metersToLatLngDelta(60, at: latitude)
+        let (latDelta, lngDelta) = metersToLatLngDelta(50, at: latitude)
         
-        let baseLat = Int(latitude * 1000)
-        let deltaLat = Int(latDelta * 1000)
+        let baseLat = Int(latitude * 10000)
+        let deltaLat = Int(latDelta * 10000)
         let latMin = baseLat - deltaLat
         let latMax = baseLat + deltaLat
         
-        let baseLng = Int(longitude * 1000) // need to Check 1000은 50m을 반영할 수 있는 수치인가?
-        let deltaLng = Int(lngDelta * 1000)
+        let baseLng = Int(longitude * 10000) // need to Check 1000은 50m을 반영할 수 있는 수치인가?
+        let deltaLng = Int(lngDelta * 10000)
         let lngMin = baseLng - deltaLng
         let lngMax = baseLng + deltaLng
         

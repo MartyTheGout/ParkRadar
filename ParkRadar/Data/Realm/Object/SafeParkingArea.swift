@@ -91,8 +91,8 @@ final class SafeParkingArea: Object {
 extension SafeParkingArea {
     func prepareIndexing() {
         guard let lat = latitude, let lng = longitude else { return }
-        latIndex = Int(lat * 1_000)
-        lngIndex = Int(lng * 1_000)
+        latIndex = Int(lat * 10_000)
+        lngIndex = Int(lng * 10_000)
         geohash = Geohash.encode(latitude: lat, longitude: lng, length: 5)
     }
 }

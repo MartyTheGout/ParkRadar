@@ -5,15 +5,18 @@ import CoreLocation
 import MapKit
 
 final class MapViewModel {
-
+    
     let repository: Repository
     let geocodingService : GeocodingService
-
+    
     var notificationToken : NotificationToken?
     
-    init(repository: Repository, geocodingService: GeocodingService) {
+    var setUnitCache : SetUnitCache
+    
+    init(repository: Repository, geocodingService: GeocodingService, setUnitCache: SetUnitCache) {
         self.repository = repository
         self.geocodingService = geocodingService
+        self.setUnitCache = setUnitCache
     }
     
     struct Input {
@@ -59,8 +62,8 @@ final class MapViewModel {
         let dangerSetsPub = PassthroughSubject<[DangerSetAnnotation], Never>()
         
         let addressPub = PassthroughSubject<String, Never>()
-        let parkingPub = PassthroughSubject<[SafeParkingArea], Never>()
-        let convertedAddressPub = PassthroughSubject<NavigationData, Never>()
+        let parkingAreasPub = PassthroughSubject<[SafeParkingArea], Never>()
+        let navigationRequiredDataPub = PassthroughSubject<NavigationData, Never>()
         
         let safeFilterPub = CurrentValueSubject<Bool, Never>(true)
         let dangerFilterPub = CurrentValueSubject<Bool, Never>(true)
@@ -71,7 +74,7 @@ final class MapViewModel {
         
         makeRealmDataSeq(in: parkedInfoPub)
         
-        //        repository.showFilePath() //for debugging
+        repository.checkVersionAndPath() //for debugging
         
         input.currentLocation
             .flatMap { location in
@@ -99,14 +102,21 @@ final class MapViewModel {
                 
                 let (center, altitude) = self.latestLocationAndZoom.value
                 
-                let safeObjects = repository.getSafeArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
-                let safeAnnotations: [SafeAnnotation] = safeObjects.compactMap { SafeAnnotation(from: $0) }
-                
-                //클러스터를 고려해야한다.
                 if altitude > 10000 {
-                    
+                    if filter {
+                        let summaries = setUnitCache.getSafeSummaries()
+                        safeSetsPub.send(summaries)
+                    } else {
+                        safeSetsPub.send([])
+                    }
                 } else {
-                    safePub.send(filter ? safeAnnotations : [])
+                    if filter {
+                        let safeObjects = repository.getSafeArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
+                        let safeAnnotations: [SafeAnnotation] = safeObjects.compactMap { SafeAnnotation(from: $0) }
+                        safePub.send(safeAnnotations)
+                    } else {
+                        safePub.send([])
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -117,10 +127,22 @@ final class MapViewModel {
                 
                 let (center, altitude) = self.latestLocationAndZoom.value
                 
-                let dangerObjects = repository.getDangerArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
-                let dangerAnnotations: [DangerAnnotation] = dangerObjects.compactMap { DangerAnnotation(from: $0) }
-                dangerPub.send(filter ? dangerAnnotations : [])
-                
+                if altitude > 10000 {
+                    if filter {
+                        let summaries = setUnitCache.getDangerSummaries()
+                        dangerSetsPub.send(summaries)
+                    } else {
+                        dangerSetsPub.send([])
+                    }
+                } else {
+                    if filter {
+                        let dangerObjects = repository.getDangerArea(latitude: center.latitude, longitude: center.longitude, altitude: altitude)
+                        let dangerAnnotations: [DangerAnnotation] = dangerObjects.compactMap { DangerAnnotation(from: $0) }
+                        dangerPub.send(dangerAnnotations)
+                    } else {
+                        dangerPub.send([])
+                    }
+                }
             }
             .store(in: &cancellables)
         
@@ -148,54 +170,19 @@ final class MapViewModel {
                     dangerPub.send(dangerFilterPub.value ? dangerAnnotations : [])
                     isDangerInfoPub.send(isDanger)
                     
-                    parkingPub.send(sortedNearbyObjects)
+                    parkingAreasPub.send(sortedNearbyObjects)
                     
                 } else {
                     safePub.send([])
                     dangerPub.send([])
                     
-                    let precision = 5 // available to control value based on altitude
-                    let safeAll = repository.getSafeAreaCluster()
-                    let dangeAll = repository.getDangerAreaCluster()
-                
-                    
                     if safeFilterPub.value {
-                        let safeClusters = Dictionary(grouping: safeAll) { obj in
-                            guard let geohash = obj.geohash else { return "" }
-                            return String(geohash.prefix(precision))
-                        }
-                        
-                        let summaries: [SafeSetAnnotation] = safeClusters.map { (hash, group) in
-                            let latAvg = group.compactMap { $0.latitude }.average
-                            let lngAvg = group.compactMap { $0.longitude }.average
-                            
-                            let summary = SetSummary(
-                                coordinate: CLLocationCoordinate2D(latitude: latAvg, longitude: lngAvg),
-                                count: group.count,
-                                geohash: String(hash)
-                            )
-                            
-                            return SafeSetAnnotation(identifier: "safeCluster", coordinate: summary.coordinate, count: summary.count)
-                        }
-                        
+                        let summaries = setUnitCache.getSafeSummaries()
                         safeSetsPub.send(summaries)
                     }
                     
                     if dangerFilterPub.value {
-                        let dangerCluster = Dictionary(grouping: dangeAll) { obj in
-                            obj.geohash.prefix(precision)
-                        }
-                        
-                        let summaries: [DangerSetAnnotation] = dangerCluster.map { (hash, group) in
-                            let latAvg = group.compactMap { $0.latitude }.average
-                            let lngAvg = group.compactMap { $0.longitude }.average
-                            let summary = SetSummary(
-                                coordinate: CLLocationCoordinate2D(latitude: latAvg, longitude: lngAvg),
-                                count: group.count,
-                                geohash: String(hash)
-                            )
-                            return DangerSetAnnotation(identifier: "dangerCluster", coordinate: summary.coordinate, count: summary.count)
-                        }
+                        let summaries = setUnitCache.getDangerSummaries()
                         dangerSetsPub.send(summaries)
                     }
                 }
@@ -218,7 +205,6 @@ final class MapViewModel {
                             y: "\(result.y)",
                             latittude: info.latitude!,
                             longtitude: info.longitude!
-                    
                         )
                     }
                     .eraseToAnyPublisher()
@@ -227,7 +213,7 @@ final class MapViewModel {
                     print("좌표 변환 실패: \(error)")
                 }
             }, receiveValue: { navigationData in
-                convertedAddressPub.send(navigationData)
+                navigationRequiredDataPub.send(navigationData)
             })
             .store(in: &cancellables)
         
@@ -237,8 +223,8 @@ final class MapViewModel {
             safeSets: safeSetsPub.eraseToAnyPublisher(),
             dangerSets: dangerSetsPub.eraseToAnyPublisher(),
             addressInformation: addressPub.eraseToAnyPublisher(),
-            parkingInformation: parkingPub.eraseToAnyPublisher(),
-            convertedLocation: convertedAddressPub.eraseToAnyPublisher(),
+            parkingInformation: parkingAreasPub.eraseToAnyPublisher(),
+            convertedLocation: navigationRequiredDataPub.eraseToAnyPublisher(),
             safeFilterCondition: safeFilterPub.eraseToAnyPublisher(),
             dangerFilterCondition: dangerFilterPub.eraseToAnyPublisher(),
             parkedLocation: parkedInfoPub.eraseToAnyPublisher(),

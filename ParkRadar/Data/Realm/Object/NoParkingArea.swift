@@ -50,15 +50,15 @@ class NoParkingArea : Object {
         self.district = district
         self.descriptionText = descriptionText
         
-        self.latInt = Int((latitude * 1000).rounded())
-        self.lngInt = Int((longitude * 1000).rounded())
+        self.latInt = Int((latitude * 10_000).rounded())
+        self.lngInt = Int((longitude * 10_000).rounded())
         
         self.geohash = Geohash.encode(latitude: latitude, longitude: longitude, length: 5)
     }
     
     func prepareIndexing() {
-        latInt = Int((latitude * 1000).rounded())
-        lngInt = Int((longitude * 1000).rounded())
+        latInt = Int((latitude * 10_000).rounded())
+        lngInt = Int((longitude * 10_000).rounded())
         geohash = Geohash.encode(latitude: latitude, longitude: longitude, length: 5)
     }
 }

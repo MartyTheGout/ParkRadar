@@ -26,7 +26,7 @@ final class ParkedLocation: Object {
         self.imagePath = imagePath
         self.savedDate = date
         
-        self.latInt = Int((latitude * 1000).rounded())
-        self.lngInt = Int((longitude * 1000).rounded())
+        self.latInt = Int((latitude * 10000).rounded())
+        self.lngInt = Int((longitude * 10000).rounded())
     }
 }

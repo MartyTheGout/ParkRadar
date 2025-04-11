@@ -17,7 +17,11 @@ class DIContainer {
     static let shared = DIContainer()
     
     func makeMapViewModel() -> MapViewModel {
-        return MapViewModel(repository: repository, geocodingService: geoCodingService)
+        return MapViewModel(
+            repository: repository,
+            geocodingService: geoCodingService,
+            setUnitCache: SetUnitCache(repository: repository)
+        )
     }
     
     func makeParkLocationViewModel(with presentable : ParkedLocationPresentable) -> ParkLocationViewModel {
