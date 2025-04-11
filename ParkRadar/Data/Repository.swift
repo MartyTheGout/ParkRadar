@@ -134,7 +134,7 @@ final class Repository: RepositoryProtocol {
     
     func isCurrentLocationDangerous(latitude : Double, longitude: Double) -> Bool {
         
-        let (latDelta, lngDelta) = metersToLatLngDelta(50, at: latitude)
+        let (latDelta, lngDelta) = metersToLatLngDelta(60, at: latitude)
         
         let baseLat = Int(latitude * 10000)
         let deltaLat = Int(latDelta * 10000)
@@ -145,19 +145,34 @@ final class Repository: RepositoryProtocol {
         let deltaLng = Int(lngDelta * 10000)
         let lngMin = baseLng - deltaLng
         let lngMax = baseLng + deltaLng
-    
+        
         if let lastLat = lastCheckedLatRange, lastLat.contains(latMin) && lastLat.contains(latMax),
            let lastLng = lastCheckedLngRange, lastLng.contains(lngMin) && lastLng.contains(lngMax) {
             return lastKnownResult! // cached value
         }
         
-        let result = realm.objects(NoParkingArea.self)
+        let roughMatches = realm.objects(NoParkingArea.self)
             .where {
                 $0.latInt >= latMin && $0.latInt <= latMax &&
                 $0.lngInt >= lngMin && $0.lngInt <= lngMax
             }
         
-        return !result.isEmpty
+        let currentLocation = CLLocation(latitude: latitude, longitude: longitude)
+        
+        let finalMatches = roughMatches.first(where: { obj in
+            let lat = obj.latitude, lng = obj.longitude
+            let targetLocation = CLLocation(latitude: lat, longitude: lng)
+            let distance = currentLocation.distance(from: targetLocation)
+            return distance <= 50
+        })
+        
+        let result = (finalMatches != nil)
+        
+        lastCheckedLatRange = latMin...latMax
+        lastCheckedLngRange = lngMin...lngMax
+        lastKnownResult = result
+        
+        return result
     }
 }
 
