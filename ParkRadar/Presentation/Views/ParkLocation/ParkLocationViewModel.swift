@@ -80,7 +80,7 @@ class ParkLocationViewModel: NSObject {
         let fileName = "parkedInfo"
         
         if let image = imageSubject.value {
-            imageHandler.saveImageToDocument(image: image, fileName: fileName)
+            imageHandler.saveImageToDocument(image: image, filename: fileName)
         }
         
         let parkedLocation = ParkedLocation(

@@ -7,48 +7,70 @@
 
 import UIKit
 
-class ImageHandler {
-    func saveImageToDocument(image: UIImage, fileName: String) {
-        guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
-        
-        let fileURL = documentDirectory.appendingPathComponent("\(fileName).jpg")
+final class ImageHandler {
+    private let appGroupID = "group.parkRadar"
+    private let subDirectory = "ParkingImages"
+
+    private var imageDirectoryURL: URL? {
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else {
+            print("[Error] App Group container not found.")
+            return nil
+        }
+        let imageDir = containerURL.appendingPathComponent(subDirectory)
+
+        // Ensure the directory exists
+        if !FileManager.default.fileExists(atPath: imageDir.path) {
+            do {
+                try FileManager.default.createDirectory(at: imageDir, withIntermediateDirectories: true)
+            } catch {
+                print("[Error] Failed to create image directory: \(error)")
+                return nil
+            }
+        }
+
+        return imageDir
+    }
+
+    func saveImageToDocument(image: UIImage, filename: String) {
+        guard let imageDir = imageDirectoryURL else { return }
+        let fileURL = imageDir.appendingPathComponent("\(filename).jpg")
         
         guard let data = image.jpegData(compressionQuality: 0.5) else { return }
-        
+
         do {
             try data.write(to: fileURL)
+            print("saveImage", fileURL)
         } catch {
-            print("[Error] Failed to save image to document directory.")
+            print("[Error] Failed to save image to AppGroup directory: \(error)")
         }
     }
-    
+
     func loadImageFromDocument(filename: String) -> UIImage? {
-        guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return nil }
-        
-        let fileURL = documentDirectory.appendingPathComponent("\(filename).jpg")
-        
-        if FileManager.default.fileExists(atPath: fileURL.path()) {
-            return UIImage(contentsOfFile: fileURL.path())
+        guard let imageDir = imageDirectoryURL else { return nil }
+        let fileURL = imageDir.appendingPathComponent("\(filename).jpg")
+
+        if FileManager.default.fileExists(atPath: fileURL.path) {
+            print("loadImage", fileURL)
+            return UIImage(contentsOfFile: fileURL.path)
         } else {
-            return UIImage(systemName: "pin.fill")
+            return UIImage(systemName: "pin.fill") // fallback
         }
     }
-    
+
     func removeImageFromDocument(filename: String) {
-        guard let documentDirectory = FileManager.default.urls(
-            for: .documentDirectory,
-            in: .userDomainMask).first else { return }
-        
-        let fileURL = documentDirectory.appendingPathComponent("\(filename).jpg")
-        
-        if FileManager.default.fileExists(atPath: fileURL.path()) {
+        guard let imageDir = imageDirectoryURL else { return }
+        let fileURL = imageDir.appendingPathComponent("\(filename).jpg")
+
+        if FileManager.default.fileExists(atPath: fileURL.path) {
             do {
-                try FileManager.default.removeItem(atPath: fileURL.path())
+                print("removeImage", fileURL)
+                try FileManager.default.removeItem(at: fileURL)
             } catch {
-                print("[Error] File remove error", error)
+                print("[Error] Failed to remove image: \(error)")
             }
         } else {
-            print("[Error] File no exist")
+            print("[Error] Image does not exist at path: \(fileURL.path)")
         }
     }
 }
+
