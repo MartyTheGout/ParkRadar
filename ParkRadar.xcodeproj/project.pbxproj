@@ -10,6 +10,7 @@
 		402146152DB7C2FF004A02CB /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 402146142DB7C2FF004A02CB /* WidgetKit.framework */; };
 		402146172DB7C2FF004A02CB /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 402146162DB7C2FF004A02CB /* SwiftUI.framework */; };
 		402146222DB7C300004A02CB /* ParkRadarWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 402146122DB7C2FF004A02CB /* ParkRadarWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		402146EC2DB7C544004A02CB /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 402146EB2DB7C544004A02CB /* RealmSwift */; };
 		4053F6952DA64E990096D371 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 4053F6942DA64E990096D371 /* FirebaseAnalytics */; };
 		4053F6972DA64E990096D371 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 4053F6962DA64E990096D371 /* FirebaseCrashlytics */; };
 		40B7F2002D98F74200BCF577 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 40B7F1FF2D98F74200BCF577 /* SnapKit */; };
@@ -109,6 +110,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				402146EC2DB7C544004A02CB /* RealmSwift in Frameworks */,
 				402146172DB7C2FF004A02CB /* SwiftUI.framework in Frameworks */,
 				402146152DB7C2FF004A02CB /* WidgetKit.framework in Frameworks */,
 			);
@@ -181,6 +183,7 @@
 			);
 			name = ParkRadarWidgetExtension;
 			packageProductDependencies = (
+				402146EB2DB7C544004A02CB /* RealmSwift */,
 			);
 			productName = ParkRadarWidgetExtension;
 			productReference = 402146122DB7C2FF004A02CB /* ParkRadarWidgetExtension.appex */;
@@ -666,6 +669,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		402146EB2DB7C544004A02CB /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 40B7F2012D98F7BF00BCF577 /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
+		};
 		4053F6942DA64E990096D371 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4053F6932DA64E990096D371 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
