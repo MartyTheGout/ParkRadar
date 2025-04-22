@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		402146152DB7C2FF004A02CB /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 402146142DB7C2FF004A02CB /* WidgetKit.framework */; };
+		402146172DB7C2FF004A02CB /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 402146162DB7C2FF004A02CB /* SwiftUI.framework */; };
+		402146222DB7C300004A02CB /* ParkRadarWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 402146122DB7C2FF004A02CB /* ParkRadarWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4053F6952DA64E990096D371 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 4053F6942DA64E990096D371 /* FirebaseAnalytics */; };
 		4053F6972DA64E990096D371 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 4053F6962DA64E990096D371 /* FirebaseCrashlytics */; };
 		40B7F2002D98F74200BCF577 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 40B7F1FF2D98F74200BCF577 /* SnapKit */; };
@@ -19,7 +22,28 @@
 		40B7F8E52D9D1FA900BCF577 /* KakaoSDKNavi in Frameworks */ = {isa = PBXBuildFile; productRef = 40B7F8E42D9D1FA900BCF577 /* KakaoSDKNavi */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		402146202DB7C300004A02CB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 40B7EABA2D93F21800BCF577 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 402146112DB7C2FF004A02CB;
+			remoteInfo = ParkRadarWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
+		402146272DB7C300004A02CB /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				402146222DB7C300004A02CB /* ParkRadarWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		40B7F2052D98F7C900BCF577 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -34,6 +58,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		402146122DB7C2FF004A02CB /* ParkRadarWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ParkRadarWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		402146142DB7C2FF004A02CB /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		402146162DB7C2FF004A02CB /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		40B7EAC22D93F21800BCF577 /* ParkRadar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ParkRadar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		40B7F22E2D98FE7F00BCF577 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		40B7F2B82D99095A00BCF577 /* fetch_and_save.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = fetch_and_save.sh; sourceTree = "<group>"; };
@@ -42,6 +69,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		402146262DB7C300004A02CB /* Exceptions for "ParkRadarWidget" folder in "ParkRadarWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 402146112DB7C2FF004A02CB /* ParkRadarWidgetExtension */;
+		};
 		40B7EAD42D93F21900BCF577 /* Exceptions for "ParkRadar" folder in "ParkRadar" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -52,6 +86,14 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		402146182DB7C2FF004A02CB /* ParkRadarWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				402146262DB7C300004A02CB /* Exceptions for "ParkRadarWidget" folder in "ParkRadarWidgetExtension" target */,
+			);
+			path = ParkRadarWidget;
+			sourceTree = "<group>";
+		};
 		40B7EAC42D93F21800BCF577 /* ParkRadar */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -63,6 +105,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4021460F2DB7C2FF004A02CB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				402146172DB7C2FF004A02CB /* SwiftUI.framework in Frameworks */,
+				402146152DB7C2FF004A02CB /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		40B7EABF2D93F21800BCF577 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -78,6 +129,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		402146132DB7C2FF004A02CB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				402146142DB7C2FF004A02CB /* WidgetKit.framework */,
+				402146162DB7C2FF004A02CB /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		40B7EAB92D93F21800BCF577 = {
 			isa = PBXGroup;
 			children = (
@@ -86,6 +146,8 @@
 				40B7F2B82D99095A00BCF577 /* fetch_and_save.sh */,
 				40B7F22E2D98FE7F00BCF577 /* .gitignore */,
 				40B7EAC42D93F21800BCF577 /* ParkRadar */,
+				402146182DB7C2FF004A02CB /* ParkRadarWidget */,
+				402146132DB7C2FF004A02CB /* Frameworks */,
 				40B7EAC32D93F21800BCF577 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -94,6 +156,7 @@
 			isa = PBXGroup;
 			children = (
 				40B7EAC22D93F21800BCF577 /* ParkRadar.app */,
+				402146122DB7C2FF004A02CB /* ParkRadarWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -101,6 +164,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		402146112DB7C2FF004A02CB /* ParkRadarWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 402146232DB7C300004A02CB /* Build configuration list for PBXNativeTarget "ParkRadarWidgetExtension" */;
+			buildPhases = (
+				4021460E2DB7C2FF004A02CB /* Sources */,
+				4021460F2DB7C2FF004A02CB /* Frameworks */,
+				402146102DB7C2FF004A02CB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				402146182DB7C2FF004A02CB /* ParkRadarWidget */,
+			);
+			name = ParkRadarWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = ParkRadarWidgetExtension;
+			productReference = 402146122DB7C2FF004A02CB /* ParkRadarWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		40B7EAC12D93F21800BCF577 /* ParkRadar */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 40B7EAD52D93F21900BCF577 /* Build configuration list for PBXNativeTarget "ParkRadar" */;
@@ -109,11 +194,13 @@
 				40B7EABF2D93F21800BCF577 /* Frameworks */,
 				40B7EAC02D93F21800BCF577 /* Resources */,
 				40B7F2052D98F7C900BCF577 /* Embed Frameworks */,
+				402146272DB7C300004A02CB /* Embed Foundation Extensions */,
 				4053F6982DA6523D0096D371 /* ShellScript */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				402146212DB7C300004A02CB /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				40B7EAC42D93F21800BCF577 /* ParkRadar */,
@@ -140,6 +227,9 @@
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					402146112DB7C2FF004A02CB = {
+						CreatedOnToolsVersion = 16.0;
+					};
 					40B7EAC12D93F21800BCF577 = {
 						CreatedOnToolsVersion = 16.0;
 					};
@@ -166,11 +256,19 @@
 			projectRoot = "";
 			targets = (
 				40B7EAC12D93F21800BCF577 /* ParkRadar */,
+				402146112DB7C2FF004A02CB /* ParkRadarWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		402146102DB7C2FF004A02CB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		40B7EAC02D93F21800BCF577 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -211,6 +309,13 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		4021460E2DB7C2FF004A02CB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		40B7EABE2D93F21800BCF577 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -220,7 +325,79 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		402146212DB7C300004A02CB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 402146112DB7C2FF004A02CB /* ParkRadarWidgetExtension */;
+			targetProxy = 402146202DB7C300004A02CB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		402146242DB7C300004A02CB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = BU56QU36XP;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ParkRadarWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ParkRadarWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.marty.ParkRadar.ParkRadarWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		402146252DB7C300004A02CB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = BU56QU36XP;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ParkRadarWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ParkRadarWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.marty.ParkRadar.ParkRadarWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 		40B7EAD62D93F21900BCF577 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = 40B7EAC42D93F21800BCF577 /* ParkRadar */;
@@ -424,6 +601,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		402146232DB7C300004A02CB /* Build configuration list for PBXNativeTarget "ParkRadarWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				402146242DB7C300004A02CB /* Debug */,
+				402146252DB7C300004A02CB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		40B7EABD2D93F21800BCF577 /* Build configuration list for PBXProject "ParkRadar" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
