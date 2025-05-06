@@ -2,6 +2,7 @@
 
 ## 소개
 ParkRadar는 사용자 위치 기반으로 주정차 단속 구역을 감지하여, 경고 및 시작/종료 정보를 제공하는 위치 기반 주정차 안내 앱입니다. 지도 확대/축소에 따라 동적으로 정보를 시각화하며, 주차 위치 저장 및 근처 공영주차장 추적 기능도 지원합니다.
+<img width="712" alt="image" src="https://github.com/user-attachments/assets/eb3cf889-e1f6-4b23-91ac-a55b7dd9ea4f" />
 
 
 ## 주요 기능
