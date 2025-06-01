@@ -11,6 +11,6 @@ import SwiftUI
 @main
 struct ParkRadarWidgetBundle: WidgetBundle {
     var body: some Widget {
-        ParkRadarWidget()
+        ParkedLocationWidget()
     }
 }

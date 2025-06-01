@@ -62,6 +62,7 @@
 		402146122DB7C2FF004A02CB /* ParkRadarWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ParkRadarWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		402146142DB7C2FF004A02CB /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		402146162DB7C2FF004A02CB /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		402147DD2DB7CEAC004A02CB /* ParkRadarWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ParkRadarWidgetExtension.entitlements; sourceTree = "<group>"; };
 		40B7EAC22D93F21800BCF577 /* ParkRadar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ParkRadar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		40B7F22E2D98FE7F00BCF577 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		40B7F2B82D99095A00BCF577 /* fetch_and_save.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = fetch_and_save.sh; sourceTree = "<group>"; };
@@ -74,6 +75,14 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+			);
+			target = 402146112DB7C2FF004A02CB /* ParkRadarWidgetExtension */;
+		};
+		402147DB2DB7CC67004A02CB /* Exceptions for "ParkRadar" folder in "ParkRadarWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Data/Realm/Object/ParkedLocation.swift,
+				Util/ImageHandler.swift,
 			);
 			target = 402146112DB7C2FF004A02CB /* ParkRadarWidgetExtension */;
 		};
@@ -99,6 +108,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				40B7EAD42D93F21900BCF577 /* Exceptions for "ParkRadar" folder in "ParkRadar" target */,
+				402147DB2DB7CC67004A02CB /* Exceptions for "ParkRadar" folder in "ParkRadarWidgetExtension" target */,
 			);
 			path = ParkRadar;
 			sourceTree = "<group>";
@@ -143,6 +153,7 @@
 		40B7EAB92D93F21800BCF577 = {
 			isa = PBXGroup;
 			children = (
+				402147DD2DB7CEAC004A02CB /* ParkRadarWidgetExtension.entitlements */,
 				40B7F2BE2D990B7300BCF577 /* README.md */,
 				40B7F2BA2D99096C00BCF577 /* source_monitor.json */,
 				40B7F2B82D99095A00BCF577 /* fetch_and_save.sh */,
@@ -342,6 +353,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = ParkRadarWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = BU56QU36XP;
@@ -349,7 +361,7 @@
 				INFOPLIST_FILE = ParkRadarWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ParkRadarWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -374,6 +386,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = ParkRadarWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = BU56QU36XP;
@@ -381,7 +394,7 @@
 				INFOPLIST_FILE = ParkRadarWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ParkRadarWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -429,7 +442,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5.0;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.marty.ParkRadar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -469,7 +482,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5.0;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.marty.ParkRadar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

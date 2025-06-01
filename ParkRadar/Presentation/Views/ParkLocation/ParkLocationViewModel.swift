@@ -8,6 +8,7 @@
 import Foundation
 import MapKit
 import Combine
+import WidgetKit
 
 struct ParkedLocationPresentable {
     var latitude: Double
@@ -26,7 +27,7 @@ class ParkLocationViewModel: NSObject {
     private var locationSubject = CurrentValueSubject<CLLocation?, Never>(nil)
     private var imageSubject = CurrentValueSubject<UIImage?, Never>(nil)
     private var addressSubject = CurrentValueSubject<String, Never>("")
-
+    
     var forSave = true
     
     // MARK: - Initialization
@@ -45,7 +46,7 @@ class ParkLocationViewModel: NSObject {
             imageSubject.send(image)
             forSave = false
         }
-         
+        
         locationSubject.send(location)
         addressSubject.send(parkedLocation.title)
     }
@@ -91,10 +92,18 @@ class ParkLocationViewModel: NSObject {
         )
         
         repository.saveParkedLocation(parkedLocation)
+        refreshParkingWidget()
     }
     
     func deleteLocation() {
         repository.deleteParkedLocation()
         imageHandler.removeImageFromDocument(filename: "parkedInfo")
+        refreshParkingWidget()
+    }
+    
+    func refreshParkingWidget() {
+        DispatchQueue.main.async {
+            WidgetCenter.shared.reloadTimelines(ofKind: "ParkedLocationWidget")
+        }
     }
 }

@@ -39,7 +39,6 @@ final class ImageHandler {
 
         do {
             try data.write(to: fileURL)
-            print("saveImage", fileURL)
         } catch {
             print("[Error] Failed to save image to AppGroup directory: \(error)")
         }
@@ -50,10 +49,9 @@ final class ImageHandler {
         let fileURL = imageDir.appendingPathComponent("\(filename).jpg")
 
         if FileManager.default.fileExists(atPath: fileURL.path) {
-            print("loadImage", fileURL)
             return UIImage(contentsOfFile: fileURL.path)
         } else {
-            return UIImage(systemName: "pin.fill") // fallback
+            return UIImage(systemName: "car.circle")
         }
     }
 

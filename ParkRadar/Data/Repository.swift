@@ -49,9 +49,6 @@ final class Repository: RepositoryProtocol {
                 $0.lngIndex >= lngMin && $0.lngIndex <= lngMax
             }
         
-        //        print("lat 범위: \(latMin) ~ \(latMax)")
-        //        print("lng 범위: \(lngMin) ~ \(lngMax)")
-        
         return safeObjects
     }
     
@@ -67,8 +64,6 @@ final class Repository: RepositoryProtocol {
                 $0.latInt >= latMin && $0.latInt <= latMax &&
                 $0.lngInt >= lngMin && $0.lngInt <= lngMax
             }
-        //        print("lat 범위: \(latMin) ~ \(latMax)")
-        //        print("lng 범위: \(lngMin) ~ \(lngMax)")
         
         return dangerObjects
     }
@@ -180,7 +175,7 @@ extension Repository {
     private func dynamicLatLngDelta(from altitude: CLLocationDistance) -> Double {
         switch altitude {
         case 0..<1000:
-            return 0.002 // 좁은 영역 (지도 확대)
+            return 0.002
         case 1000..<3000:
             return 0.005
         case 3000..<7000:
@@ -188,7 +183,7 @@ extension Repository {
         case 7000..<15000:
             return 0.02
         default:
-            return 0.04 // 넓은 영역 (지도 축소, 서울시 단위)
+            return 0.04
         }
     }
     
